@@ -1,0 +1,91 @@
+---
+description: Architectural and product decisions with reasoning — consult when making technical or product choices
+globs:
+alwaysApply: false
+---
+
+# Tiny Tales — Decisions Log
+
+A running record of architectural and product decisions made during planning, and the reasoning behind them. When an agent encounters a choice that seems arbitrary, the answer is likely here.
+
+Do not re-litigate these decisions mid-ticket. If a decision needs to be revisited, flag it for the human owner.
+
+---
+
+## Architecture Decisions
+
+### ADR-001 — Hasura over a custom GraphQL server
+**Decision:** Use Hasura Cloud as the GraphQL API layer rather than building a custom Node/Express GraphQL server.
+**Reasoning:** Hasura auto-generates CRUD operations, handles row-level permissions via JWT claims, supports real-time subscriptions, and connects directly to Supabase Postgres. The alternative (custom Yoga/Apollo Server) would require writing resolvers, auth middleware, and subscription infrastructure from scratch with no meaningful benefit for this use case.
+**Trade-off:** Custom business logic (AI pipeline, account deletion) moves to Cloudflare Workers as Hasura Actions, rather than living in one server. This is an acceptable separation.
+
+### ADR-002 — Cloudflare Workers for custom logic
+**Decision:** All custom server-side logic (AI pipeline, PDF generation, print orders) lives in Cloudflare Workers, not a traditional server.
+**Reasoning:** No server to maintain, global edge deployment, fast cold starts, and cost-effective at low-to-medium traffic. The AI pipeline is a short-lived stateless operation — a perfect fit for Workers.
+**Trade-off:** Workers have CPU time limits and no filesystem access. Long-running operations (PDF generation) must be optimised or offloaded to a durable object / queue if they exceed limits.
+
+### ADR-003 — Supabase Auth + Hasura JWT (not Hasura Auth)
+**Decision:** Use Supabase Auth for user management and configure it to issue JWTs with Hasura claims, rather than using Hasura's own auth layer.
+**Reasoning:** Supabase Auth gives us email/password + OAuth out of the box, a mature dashboard, and native storage integration. Hasura's auth (formerly Auth0-based) adds a third service to the stack unnecessarily.
+**Trade-off:** Requires a custom JWT hook in Supabase to inject Hasura claims. This is a one-time setup (TICKET-002) and well-documented.
+
+### ADR-004 — Audio files discarded after processing
+**Decision:** Raw audio recordings are uploaded to a temporary Supabase Storage bucket with a 24-hour TTL and deleted after the AI pipeline processes them. They are never stored permanently.
+**Reasoning:** Audio files are large, expensive to store at scale, and raise privacy complexity (recordings of children's voices are sensitive data under NZ/AU privacy law). The parent's voice is not the product — the written narrative is. A future premium feature ("voice clips") could revisit this, but would require explicit consent and a separate opt-in flow.
+**Trade-off:** Parents cannot replay their original recording. This is an intentional product decision, not a technical limitation.
+
+### ADR-005 — RevenueCat for subscriptions
+**Decision:** Use RevenueCat to manage in-app subscriptions rather than implementing StoreKit/BillingClient directly.
+**Reasoning:** RevenueCat handles receipt validation, renewal logic, cancellation webhooks, and cross-platform entitlement management. Building this natively is weeks of work and an ongoing maintenance burden. RevenueCat's free tier covers the expected v1 volume.
+**Trade-off:** RevenueCat is a third-party dependency with its own pricing at scale. This is worth revisiting if and when subscription volume is large enough to make the RevenueCat cut significant.
+
+### ADR-006 — Apollo Client cache strategy: refetchQueries over cache.modify
+**Decision:** After mutations, use `refetchQueries` to keep the Apollo cache fresh rather than manual `cache.modify()` calls.
+**Reasoning:** Manual cache updates are fragile and create subtle bugs when query shapes change. The performance difference is negligible at v1 scale. Cache.modify() can be introduced for specific performance bottlenecks later if needed.
+
+---
+
+## Product Decisions
+
+### PDR-001 — Family account model (not individual accounts)
+**Decision:** The top-level entity is a `family_account`, not a user. Multiple parents share one family account. Guests are linked to a family account, not individual parents.
+**Reasoning:** Tales belong to the family, not to an individual parent. Both parents should see the same feed, the same guests, and have equal access. Separate accounts with "sharing" would create unnecessary complexity and a worse UX.
+**Trade-off:** A parent cannot be a member of two family accounts in v1 (edge case: blended families). This is noted as a future enhancement.
+
+### PDR-002 — Free tier: 25 total tales (not monthly limit)
+**Decision:** The free tier caps at 25 total tales stored, not a monthly posting limit.
+**Reasoning:** A monthly limit punishes active users and creates anxiety around posting. A total cap creates a single natural upgrade moment — "your library is full" — which is emotionally resonant for a memory app. It also directly ties to our AI cost (each tale = one AI call).
+**Upgrade prompt trigger:** Warning banner at 20 tales, hard block at 25.
+
+### PDR-003 — Guests: 2 free, unlimited paid
+**Decision:** Free accounts can have up to 2 active guests. Paid accounts have unlimited guests.
+**Reasoning:** Guests are the primary viral acquisition channel — completely blocking them on free kills word-of-mouth. 2 guests covers the most common use case (one set of grandparents). "Invite the whole extended family" is a natural and emotionally compelling upgrade driver.
+
+### PDR-004 — AI produces a polished narrative (not a transcript)
+**Decision:** The AI pipeline rewrites the parent's recording as a polished 2-4 paragraph narrative. The raw transcript is not shown to the user.
+**Reasoning:** The core product value is turning a rushed, rambling voice note into something beautiful enough to share and keep. Showing a cleaned-up transcript would be half the magic. The parent can still edit the narrative freely after AI generates it.
+**Constraint:** The AI must not invent facts or change the meaning of what was said. This is enforced in the system prompt.
+
+### PDR-005 — Inspiration prompts: generic for v1
+**Decision:** Home screen inspiration prompts are a hardcoded rotating list of ~20 generic prompts in v1. Personalised prompts (based on child age and tale history) are deferred.
+**Reasoning:** Personalised prompts require ML infrastructure and a reasonable tale history to learn from. Generic prompts deliver 80% of the value for 5% of the build effort. This is an explicit v1 scope decision, not an oversight.
+
+### PDR-006 — Printed book: placeholder flow for v1 launch
+**Decision:** The printed book feature launches with a "notify me" email capture placeholder rather than a full print partner integration.
+**Reasoning:** Print partner contracts (Momento, Chatbooks, etc.) take time to negotiate. The PDF generation (TICKET-030) is built and real — only the ordering step is a placeholder. This lets us validate demand before committing to an integration.
+
+### PDR-007 — No tab navigation
+**Decision:** The app uses stack-based navigation with no tab bar. The only persistent navigation element is the FAB for adding a new tale.
+**Reasoning:** Explicit product decision from the design phase. The app is intentionally simple — Home → Tale Detail is the primary flow. Account and settings are secondary. A tab bar would give equal visual weight to settings, which competes with the core action.
+
+---
+
+## Open Decisions (not yet resolved)
+
+| # | Decision | Notes |
+|---|---|---|
+| OD-001 | Guest invite mechanism | Shareable link vs email vs both — affects TICKET-018/019 |
+| OD-002 | AI model selection | OpenAI (Whisper + GPT-4o) vs Anthropic Claude — affects TICKET-008 |
+| OD-003 | Print partner | Momento vs Chatbooks vs Printful — affects TICKET-031 |
+| OD-004 | Subscription pricing | ~$6.99 NZD/month or $54.99/year — needs market validation |
+| OD-005 | Sign in with Apple | Required by App Store if any social auth is offered — confirm before TICKET-004 goes live |

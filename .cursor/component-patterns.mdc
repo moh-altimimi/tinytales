@@ -1,0 +1,259 @@
+---
+description: React Native component structure, patterns, and conventions
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# Tiny Tales — Component Patterns
+
+How to structure React Native components in this codebase. Follow these patterns consistently so all components feel like they came from the same hand.
+
+---
+
+## Component File Structure
+
+Every component file follows this order — no exceptions:
+
+```typescript
+// 1. React & RN imports
+import { View, Text, Pressable } from 'react-native'
+
+// 2. Third-party imports
+import { format } from 'date-fns'
+
+// 3. Internal imports (lib, hooks, other components)
+import { YELLOW } from '../lib/theme'
+import { TagChip } from './TagChip'
+
+// 4. Types
+interface TaleCardProps {
+  tale: {
+    id: string
+    title: string | null
+    narrative: string
+    created_at: string
+    author: { name: string; avatar_url: string | null }
+    tale_children: Array<{ child: { id: string; name: string; photo_url: string | null } }>
+    tale_tags: Array<{ tag: string }>
+  }
+  onPress: (id: string) => void
+}
+
+// 5. Component (named export, not default)
+export function TaleCard({ tale, onPress }: TaleCardProps) {
+  // hooks first
+  // derived values / handlers next
+  // return JSX last
+}
+```
+
+Always use **named exports** for components. Never use `export default` for components (Expo Router screens are the only exception — they require default exports).
+
+---
+
+## Screen File Structure
+
+Expo Router screens (files inside `app/`) use default exports and follow this pattern:
+
+```typescript
+import { View, FlatList } from 'react-native'
+import { useLocalSearchParams } from 'expo-router'
+
+// Internal
+import { useTaleDetail } from '../../hooks/useTaleDetail'
+import { TaleDetailSkeleton } from '../../components/TaleDetailSkeleton'
+import { ErrorMessage } from '../../components/ErrorMessage'
+
+export default function TaleDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>()
+  const { tale, loading, error, refetch } = useTaleDetail(id)
+
+  if (loading) return <TaleDetailSkeleton />
+  if (error) return <ErrorMessage onRetry={refetch} />
+  if (!tale) return <ErrorMessage message="Tale not found" />
+
+  return (
+    <View className="flex-1 bg-white">
+      {/* content */}
+    </View>
+  )
+}
+```
+
+---
+
+## The Three-State Rule
+
+Every component that loads data must render correctly in all three states. Handle them at the top of the component before the main return — no ternaries buried inside JSX for loading/error states.
+
+```typescript
+// ✅ Correct — guard clauses at the top
+if (loading) return <TaleCardSkeleton />
+if (error) return <ErrorMessage onRetry={refetch} />
+if (!tales.length) return <EmptyFeed />
+
+return ( /* main content */ )
+
+// ❌ Wrong — buried ternaries
+return (
+  <View>
+    {loading ? <Spinner /> : error ? <Text>Error</Text> : tales.map(...)}
+  </View>
+)
+```
+
+---
+
+## Skeleton Components
+
+Every list item or card component that loads async data must have a corresponding skeleton:
+
+- `TaleCard.tsx` → `TaleCardSkeleton.tsx`
+- `CommentItem.tsx` → `CommentItemSkeleton.tsx`
+
+Skeletons use `className="bg-gray-200 rounded animate-pulse"` blocks to represent the content shape. Show 3 skeletons for any list.
+
+---
+
+## Pressable vs TouchableOpacity
+
+Always use `Pressable` — not `TouchableOpacity`, not `TouchableHighlight`.
+
+```typescript
+<Pressable
+  onPress={handlePress}
+  className="active:opacity-70"
+>
+  <Text className="text-base font-medium text-gray-900">{tale.title}</Text>
+</Pressable>
+```
+
+---
+
+## Buttons
+
+Use a consistent `Button` component from `components/Button.tsx`. Never build ad-hoc buttons in screens.
+
+```typescript
+// components/Button.tsx
+interface ButtonProps {
+  label: string
+  onPress: () => void
+  variant?: 'primary' | 'secondary' | 'destructive'
+  loading?: boolean
+  disabled?: boolean
+  fullWidth?: boolean
+}
+```
+
+- `primary` — brand yellow background, dark text (main CTAs)
+- `secondary` — white background, dark border, dark text
+- `destructive` — red background, white text (delete, revoke)
+
+---
+
+## Forms & Inputs
+
+- Use `TextInput` from React Native — never a third-party input library
+- Wrap all form screens in `KeyboardAvoidingView` with `behavior="padding"` on iOS
+- Show validation errors inline below the field, in red, only after the user has interacted with the field (`onBlur` triggers validation, not `onChange`)
+
+```typescript
+<View className="mb-4">
+  <Text className="text-sm font-medium text-gray-700 mb-1">Name</Text>
+  <TextInput
+    value={name}
+    onChangeText={setName}
+    onBlur={() => setTouched(true)}
+    className="border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-900"
+    placeholder="Child's name"
+  />
+  {touched && !name && (
+    <Text className="text-sm text-red-500 mt-1">Name is required</Text>
+  )}
+</View>
+```
+
+---
+
+## Modals & Bottom Sheets
+
+- Use `Modal` from React Native for full-screen confirmation modals (e.g. delete account)
+- Use `@gorhom/bottom-sheet` for bottom sheets (tag picker, filter sheet)
+- Always include a dismiss gesture (swipe down or tap backdrop)
+- Confirmation modals must have an explicit Cancel button — never rely solely on swipe-to-dismiss
+
+---
+
+## Role-Based Rendering
+
+Check `currentUser.role` from the Zustand store to conditionally show parent-only controls. Never show edit/delete to guests.
+
+```typescript
+import { useStore } from '../lib/store'
+
+const { currentUser } = useStore()
+const isParent = currentUser.role === 'parent'
+
+// In JSX:
+{isParent && (
+  <Pressable onPress={handleEdit}>
+    <EditIcon />
+  </Pressable>
+)}
+```
+
+---
+
+## Avatar Component
+
+Use a shared `Avatar` component for all user and child avatars. It handles missing photos with an initial-based fallback.
+
+```typescript
+// components/Avatar.tsx
+interface AvatarProps {
+  uri?: string | null
+  name: string
+  size?: 'sm' | 'md' | 'lg'  // 32, 44, 64px
+}
+```
+
+---
+
+## Date Formatting
+
+Always use `date-fns` — never `new Date().toLocaleDateString()`.
+
+```typescript
+import { formatDistanceToNow, format } from 'date-fns'
+
+// Relative (feed): "2 hours ago"
+formatDistanceToNow(new Date(tale.created_at), { addSuffix: true })
+
+// Absolute (detail): "Monday 1 September 2025"
+format(new Date(tale.created_at), 'EEEE d MMMM yyyy')
+```
+
+---
+
+## Empty States
+
+Every empty state gets a friendly message and, where appropriate, a CTA. Never render a blank screen.
+
+```typescript
+// components/EmptyFeed.tsx
+export function EmptyFeed() {
+  return (
+    <View className="flex-1 items-center justify-center px-8 py-16">
+      <Text className="text-4xl mb-4">📖</Text>
+      <Text className="text-xl font-semibold text-gray-900 text-center mb-2">
+        No tales yet
+      </Text>
+      <Text className="text-base text-gray-500 text-center mb-6">
+        Record your first moment — it only takes a minute.
+      </Text>
+      <Button label="Tell a tale" onPress={() => router.push('/(app)/tale/new')} />
+    </View>
+  )
+}
+```

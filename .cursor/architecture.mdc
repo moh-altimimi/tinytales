@@ -1,0 +1,401 @@
+---
+description: Core architecture, stack, schema, and conventions for Tiny Tales
+globs:
+alwaysApply: true
+---
+
+# Tiny Tales — Technical Architecture
+
+> **Every coding agent must read this document before starting any ticket.**
+> Each ticket references specific sections here. Only read the sections relevant to your ticket.
+
+---
+
+## 1. Stack Overview
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Mobile App | React Native + Expo (TypeScript) | iOS & Android |
+| Navigation | Expo Router (file-based) | Screen routing |
+| GraphQL Client | Apollo Client + graphql-tada | Type-safe queries |
+| GraphQL API | Hasura Cloud | Auto-generated GraphQL on Postgres |
+| Database | Supabase Postgres | Relational data store |
+| Auth | Supabase Auth → Hasura JWT | User authentication |
+| File Storage | Supabase Storage | Media uploads (photos/videos) |
+| AI Pipeline | Cloudflare Workers | Transcription + narrative generation |
+| State Management | Zustand | Lightweight global state |
+| Styling | NativeWind (Tailwind for RN) | Utility-first styling |
+
+---
+
+## 2. Repository Structure
+
+```
+tinytales/
+├── apps/
+│   └── mobile/                    # Expo React Native app
+│       ├── app/                   # Expo Router screens (file-based routing)
+│       │   ├── (auth)/
+│       │   │   ├── login.tsx
+│       │   │   └── register.tsx
+│       │   ├── (app)/
+│       │   │   ├── index.tsx      # Home screen
+│       │   │   ├── tale/
+│       │   │   │   ├── new.tsx    # Tell a tale flow
+│       │   │   │   └── [id].tsx   # Tale detail
+│       │   │   └── account.tsx    # Account & settings
+│       │   └── guest/
+│       │       └── index.tsx      # Guest view
+│       ├── components/            # Shared UI components
+│       ├── graphql/               # .graphql query files + tada types
+│       ├── lib/                   # Utilities, clients, constants
+│       │   ├── apollo.ts          # Apollo Client setup
+│       │   ├── supabase.ts        # Supabase client (auth + storage)
+│       │   └── store.ts           # Zustand stores
+│       └── hooks/                 # Custom React hooks
+├── services/
+│   └── ai-pipeline/               # Cloudflare Worker
+│       ├── src/
+│       │   └── index.ts
+│       └── wrangler.toml
+├── hasura/                        # Hasura metadata + migrations
+│   ├── migrations/
+│   └── metadata/
+└── docs/                          # This docs folder
+```
+
+---
+
+## 3. Database Schema
+
+All tables live in the `public` schema in Supabase Postgres. Hasura tracks all tables.
+
+### 3.1 Core Tables
+
+```sql
+-- Family account: top-level owner of all data
+CREATE TABLE family_accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Users: both parents and guests
+CREATE TABLE users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  family_account_id UUID REFERENCES family_accounts(id),
+  name TEXT NOT NULL,
+  avatar_url TEXT,
+  role TEXT NOT NULL CHECK (role IN ('parent', 'guest')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Children profiles
+CREATE TABLE children (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_account_id UUID NOT NULL REFERENCES family_accounts(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  photo_url TEXT,
+  date_of_birth DATE,
+  gender TEXT CHECK (gender IN ('male', 'female', 'other', 'prefer_not_to_say')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Tales
+CREATE TABLE tales (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_account_id UUID NOT NULL REFERENCES family_accounts(id) ON DELETE CASCADE,
+  author_id UUID NOT NULL REFERENCES users(id),
+  title TEXT,
+  narrative TEXT NOT NULL,
+  raw_transcript TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Many-to-many: tales <-> children
+CREATE TABLE tale_children (
+  tale_id UUID NOT NULL REFERENCES tales(id) ON DELETE CASCADE,
+  child_id UUID NOT NULL REFERENCES children(id) ON DELETE CASCADE,
+  PRIMARY KEY (tale_id, child_id)
+);
+
+-- Tags on tales
+CREATE TABLE tale_tags (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tale_id UUID NOT NULL REFERENCES tales(id) ON DELETE CASCADE,
+  tag TEXT NOT NULL,
+  UNIQUE (tale_id, tag)
+);
+
+-- Media attachments
+CREATE TABLE tale_media (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tale_id UUID NOT NULL REFERENCES tales(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  media_type TEXT NOT NULL CHECK (media_type IN ('photo', 'video')),
+  display_order INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Emoji reactions
+CREATE TABLE reactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tale_id UUID NOT NULL REFERENCES tales(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  emoji TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (tale_id, user_id, emoji)
+);
+
+-- Comments
+CREATE TABLE comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tale_id UUID NOT NULL REFERENCES tales(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Guest invites
+CREATE TABLE guest_invites (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_account_id UUID NOT NULL REFERENCES family_accounts(id) ON DELETE CASCADE,
+  invited_by UUID NOT NULL REFERENCES users(id),
+  token TEXT NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(32), 'hex'),
+  email TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'revoked')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Subscriptions
+CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  family_account_id UUID NOT NULL REFERENCES family_accounts(id) ON DELETE CASCADE,
+  status TEXT NOT NULL CHECK (status IN ('active', 'cancelled', 'expired')),
+  platform TEXT CHECK (platform IN ('ios', 'android')),
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
+### 3.2 Computed Fields & Views
+
+```sql
+-- Count tales per family account (used for free tier enforcement)
+CREATE OR REPLACE VIEW family_tale_counts AS
+SELECT family_account_id, COUNT(*) as tale_count
+FROM tales
+GROUP BY family_account_id;
+```
+
+---
+
+## 4. Auth Model
+
+### Flow
+1. User registers/logs in via **Supabase Auth** (email+password or OAuth)
+2. Supabase issues a **JWT**
+3. JWT is passed as `Authorization: Bearer <token>` to Hasura
+4. Hasura validates the JWT and reads `x-hasura-*` claims to enforce row-level permissions
+
+### JWT Claims
+Supabase Auth must be configured to include Hasura claims. Add this as a Postgres function + webhook, or use Supabase's `auth.users` hooks:
+
+```json
+{
+  "x-hasura-allowed-roles": ["parent", "guest"],
+  "x-hasura-default-role": "parent",
+  "x-hasura-user-id": "<user_uuid>",
+  "x-hasura-family-account-id": "<family_account_uuid>"
+}
+```
+
+Configure in Supabase: **Dashboard → Auth → Hooks → Custom Access Token** using a Postgres function that reads the user's row from `public.users`.
+
+### Hasura Permissions
+- **parent** role: full CRUD on their `family_account_id` scoped data
+- **guest** role: SELECT only on tales/comments/reactions for their `family_account_id`; INSERT on reactions/comments only
+
+---
+
+## 5. GraphQL Conventions (graphql-tada)
+
+### Setup
+- All `.graphql` files live in `apps/mobile/graphql/`
+- graphql-tada generates types from the Hasura schema introspection
+- Schema is introspected at `HASURA_GRAPHQL_ENDPOINT/v1/graphql`
+
+### File naming
+```
+graphql/
+├── queries/
+│   ├── GetTalesFeed.graphql
+│   └── GetTaleDetail.graphql
+├── mutations/
+│   ├── InsertTale.graphql
+│   └── DeleteTale.graphql
+└── subscriptions/
+    └── OnNewComment.graphql
+```
+
+### Usage pattern
+```typescript
+import { graphql } from '../lib/tada'
+import { useQuery } from '@apollo/client'
+
+const GET_TALES = graphql(`
+  query GetTalesFeed($familyAccountId: uuid!) {
+    tales(
+      where: { family_account_id: { _eq: $familyAccountId } }
+      order_by: { created_at: desc }
+    ) {
+      id
+      title
+      narrative
+      created_at
+      author { name avatar_url }
+      tale_children { child { id name photo_url } }
+      tale_tags { tag }
+    }
+  }
+`)
+
+const { data } = useQuery(GET_TALES, {
+  variables: { familyAccountId: currentUser.familyAccountId }
+})
+```
+
+---
+
+## 6. AI Pipeline (Cloudflare Worker)
+
+### Endpoint
+`POST https://ai.tinytales.workers.dev/process`
+
+Called as a **Hasura Action** — Hasura handles auth, the worker handles AI.
+
+### Request
+```json
+{
+  "audio_url": "https://storage.supabase.co/...",
+  "child_names": ["Lachlan", "Ben"],
+  "family_account_id": "uuid"
+}
+```
+
+### Response
+```json
+{
+  "narrative": "Lachlan discovered that he can make his shadow dance...",
+  "tags": ["Discovery", "Funny"],
+  "title": "Dancing with shadows"
+}
+```
+
+### Pipeline Steps
+1. Fetch audio file from Supabase Storage URL
+2. Send to **OpenAI Whisper** (`whisper-1`) for transcription
+3. Send transcript + child names to **Anthropic Claude** (`claude-sonnet-4-5`) for narrative + tags
+4. Return structured response
+5. Audio file is deleted from Supabase Storage after successful processing
+
+### Claude System Prompt Template
+```
+You are a warm, empathetic writer helping a parent preserve a precious memory.
+
+Given a raw voice transcript of a parent describing a moment with their child/children ({{child_names}}), produce:
+1. A polished 2-4 paragraph narrative in first person, warm and personal. Do NOT invent facts. Retain all emotional truth.
+2. A short title (5 words max)
+3. 1-3 tags from this list only: Milestone, Funny, Heartwarming, Discovery, Birthday, Adventure, Creative, Friendship, Family
+
+Respond ONLY with valid JSON: { "narrative": "...", "title": "...", "tags": ["..."] }
+```
+
+### Hasura Action Definition
+```yaml
+- name: processAudioTale
+  definition:
+    kind: synchronous
+    handler: https://ai.tinytales.workers.dev/process
+  request_transform:
+    body:
+      action: transform
+      template: '{"audio_url": {{$body.input.audio_url}}, "child_names": {{$body.input.child_names}}, "family_account_id": {{$session_variables["x-hasura-family-account-id"]}}'
+```
+
+---
+
+## 7. File Storage (Supabase Storage)
+
+### Buckets
+| Bucket | Access | Contents |
+|---|---|---|
+| `tale-media` | Private (signed URLs) | Photos/videos attached to tales |
+| `child-photos` | Private (signed URLs) | Child profile photos |
+| `audio-temp` | Private | Temporary audio files (auto-delete via lifecycle rule: 24h TTL) |
+
+### Upload pattern (mobile)
+```typescript
+import { supabase } from '../lib/supabase'
+
+const uploadMedia = async (uri: string, taleId: string) => {
+  const fileName = `${taleId}/${Date.now()}.jpg`
+  const response = await fetch(uri)
+  const blob = await response.blob()
+  
+  const { data, error } = await supabase.storage
+    .from('tale-media')
+    .upload(fileName, blob, { contentType: 'image/jpeg' })
+    
+  return data?.path
+}
+```
+
+---
+
+## 8. Free Tier Enforcement
+
+Logic lives **server-side in Hasura** using a permission check + computed field.
+
+- Before inserting a new tale, a Hasura **insert permission condition** checks:
+  ```json
+  { "family_account": { "tale_count": { "_lt": 25 } } }
+  ```
+  (using the `family_tale_counts` view as a relationship)
+- If the user has an active subscription, this check is bypassed
+- The mobile app also checks tale count client-side to show the upgrade prompt at 20 tales
+
+---
+
+## 9. Environment Variables
+
+### Mobile app (`apps/mobile/.env`)
+```
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+EXPO_PUBLIC_HASURA_ENDPOINT=
+EXPO_PUBLIC_HASURA_WS_ENDPOINT=
+```
+
+### Cloudflare Worker (`services/ai-pipeline/.dev.vars`)
+```
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_URL=
+```
+
+---
+
+## 10. Key Conventions
+
+- **TypeScript strict mode** enabled everywhere — no `any`
+- **Component files**: PascalCase (`TaleCard.tsx`), hooks: camelCase prefixed with `use` (`useTalesFeed.ts`)
+- **GraphQL operations**: PascalCase named operations (`GetTalesFeed`, `InsertTale`)
+- **UUIDs** for all primary keys — never expose sequential IDs
+- **Dates**: always stored as UTC, displayed in local timezone using `date-fns`
+- **Error handling**: all mutations wrapped in try/catch, errors surfaced via a global toast (use `react-native-toast-message`)
+- **Colours**: brand yellow `#FDD835`, dark `#1A1A1A` — defined as constants in `lib/theme.ts`
+- **No inline styles** — use NativeWind classes only
+- **Loading states**: every async operation shows a skeleton or spinner — never a blank screen
