@@ -1,0 +1,5704 @@
+schema {
+  query: query_root
+  mutation: mutation_root
+  subscription: subscription_root
+}
+
+"""whether this query should be cached (Hasura Cloud only)"""
+directive @cached(
+  """measured in seconds"""
+  ttl: Int! = 60
+
+  """refresh the cache entry"""
+  refresh: Boolean! = false
+) on QUERY
+
+"""
+Boolean expression to compare columns of type "Int". All fields are combined with logical 'AND'.
+"""
+input Int_comparison_exp {
+  _eq: Int
+  _gt: Int
+  _gte: Int
+  _in: [Int!]
+  _is_null: Boolean
+  _lt: Int
+  _lte: Int
+  _neq: Int
+  _nin: [Int!]
+}
+
+"""
+Boolean expression to compare columns of type "String". All fields are combined with logical 'AND'.
+"""
+input String_comparison_exp {
+  _eq: String
+  _gt: String
+  _gte: String
+
+  """does the column match the given case-insensitive pattern"""
+  _ilike: String
+  _in: [String!]
+
+  """
+  does the column match the given POSIX regular expression, case insensitive
+  """
+  _iregex: String
+  _is_null: Boolean
+
+  """does the column match the given pattern"""
+  _like: String
+  _lt: String
+  _lte: String
+  _neq: String
+
+  """does the column NOT match the given case-insensitive pattern"""
+  _nilike: String
+  _nin: [String!]
+
+  """
+  does the column NOT match the given POSIX regular expression, case insensitive
+  """
+  _niregex: String
+
+  """does the column NOT match the given pattern"""
+  _nlike: String
+
+  """
+  does the column NOT match the given POSIX regular expression, case sensitive
+  """
+  _nregex: String
+
+  """does the column NOT match the given SQL regular expression"""
+  _nsimilar: String
+
+  """
+  does the column match the given POSIX regular expression, case sensitive
+  """
+  _regex: String
+
+  """does the column match the given SQL regular expression"""
+  _similar: String
+}
+
+scalar bigint
+
+"""
+Boolean expression to compare columns of type "bigint". All fields are combined with logical 'AND'.
+"""
+input bigint_comparison_exp {
+  _eq: bigint
+  _gt: bigint
+  _gte: bigint
+  _in: [bigint!]
+  _is_null: Boolean
+  _lt: bigint
+  _lte: bigint
+  _neq: bigint
+  _nin: [bigint!]
+}
+
+"""
+columns and relationships of "children"
+"""
+type children {
+  created_at: timestamptz!
+  date_of_birth: date
+
+  """An object relationship"""
+  family_account: family_accounts!
+  family_account_id: uuid!
+  gender: String
+  id: uuid!
+  name: String!
+  photo_url: String
+
+  """An array relationship"""
+  tale_children(
+    """distinct select on columns"""
+    distinct_on: [tale_children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_children_order_by!]
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): [tale_children!]!
+
+  """An aggregate relationship"""
+  tale_children_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_children_order_by!]
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): tale_children_aggregate!
+}
+
+"""
+aggregated selection of "children"
+"""
+type children_aggregate {
+  aggregate: children_aggregate_fields
+  nodes: [children!]!
+}
+
+input children_aggregate_bool_exp {
+  count: children_aggregate_bool_exp_count
+}
+
+input children_aggregate_bool_exp_count {
+  arguments: [children_select_column!]
+  distinct: Boolean
+  filter: children_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "children"
+"""
+type children_aggregate_fields {
+  count(columns: [children_select_column!], distinct: Boolean): Int!
+  max: children_max_fields
+  min: children_min_fields
+}
+
+"""
+order by aggregate values of table "children"
+"""
+input children_aggregate_order_by {
+  count: order_by
+  max: children_max_order_by
+  min: children_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "children"
+"""
+input children_arr_rel_insert_input {
+  data: [children_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: children_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "children". All fields are combined with a logical 'AND'.
+"""
+input children_bool_exp {
+  _and: [children_bool_exp!]
+  _not: children_bool_exp
+  _or: [children_bool_exp!]
+  created_at: timestamptz_comparison_exp
+  date_of_birth: date_comparison_exp
+  family_account: family_accounts_bool_exp
+  family_account_id: uuid_comparison_exp
+  gender: String_comparison_exp
+  id: uuid_comparison_exp
+  name: String_comparison_exp
+  photo_url: String_comparison_exp
+  tale_children: tale_children_bool_exp
+  tale_children_aggregate: tale_children_aggregate_bool_exp
+}
+
+"""
+unique or primary key constraints on table "children"
+"""
+enum children_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  children_pkey
+}
+
+"""
+input type for inserting data into table "children"
+"""
+input children_insert_input {
+  created_at: timestamptz
+  date_of_birth: date
+  family_account: family_accounts_obj_rel_insert_input
+  family_account_id: uuid
+  gender: String
+  id: uuid
+  name: String
+  photo_url: String
+  tale_children: tale_children_arr_rel_insert_input
+}
+
+"""aggregate max on columns"""
+type children_max_fields {
+  created_at: timestamptz
+  date_of_birth: date
+  family_account_id: uuid
+  gender: String
+  id: uuid
+  name: String
+  photo_url: String
+}
+
+"""
+order by max() on columns of table "children"
+"""
+input children_max_order_by {
+  created_at: order_by
+  date_of_birth: order_by
+  family_account_id: order_by
+  gender: order_by
+  id: order_by
+  name: order_by
+  photo_url: order_by
+}
+
+"""aggregate min on columns"""
+type children_min_fields {
+  created_at: timestamptz
+  date_of_birth: date
+  family_account_id: uuid
+  gender: String
+  id: uuid
+  name: String
+  photo_url: String
+}
+
+"""
+order by min() on columns of table "children"
+"""
+input children_min_order_by {
+  created_at: order_by
+  date_of_birth: order_by
+  family_account_id: order_by
+  gender: order_by
+  id: order_by
+  name: order_by
+  photo_url: order_by
+}
+
+"""
+response of any mutation on the table "children"
+"""
+type children_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [children!]!
+}
+
+"""
+input type for inserting object relation for remote table "children"
+"""
+input children_obj_rel_insert_input {
+  data: children_insert_input!
+
+  """upsert condition"""
+  on_conflict: children_on_conflict
+}
+
+"""
+on_conflict condition type for table "children"
+"""
+input children_on_conflict {
+  constraint: children_constraint!
+  update_columns: [children_update_column!]! = []
+  where: children_bool_exp
+}
+
+"""Ordering options when selecting data from "children"."""
+input children_order_by {
+  created_at: order_by
+  date_of_birth: order_by
+  family_account: family_accounts_order_by
+  family_account_id: order_by
+  gender: order_by
+  id: order_by
+  name: order_by
+  photo_url: order_by
+  tale_children_aggregate: tale_children_aggregate_order_by
+}
+
+"""primary key columns input for table: children"""
+input children_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "children"
+"""
+enum children_select_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  date_of_birth
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  gender
+
+  """column name"""
+  id
+
+  """column name"""
+  name
+
+  """column name"""
+  photo_url
+}
+
+"""
+input type for updating data in table "children"
+"""
+input children_set_input {
+  created_at: timestamptz
+  date_of_birth: date
+  family_account_id: uuid
+  gender: String
+  id: uuid
+  name: String
+  photo_url: String
+}
+
+"""
+Streaming cursor of the table "children"
+"""
+input children_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: children_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input children_stream_cursor_value_input {
+  created_at: timestamptz
+  date_of_birth: date
+  family_account_id: uuid
+  gender: String
+  id: uuid
+  name: String
+  photo_url: String
+}
+
+"""
+update columns of table "children"
+"""
+enum children_update_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  date_of_birth
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  gender
+
+  """column name"""
+  id
+
+  """column name"""
+  name
+
+  """column name"""
+  photo_url
+}
+
+input children_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: children_set_input
+
+  """filter the rows which have to be updated"""
+  where: children_bool_exp!
+}
+
+"""
+columns and relationships of "comments"
+"""
+type comments {
+  content: String!
+  created_at: timestamptz!
+  id: uuid!
+
+  """An object relationship"""
+  tale: tales!
+  tale_id: uuid!
+  updated_at: timestamptz!
+
+  """An object relationship"""
+  user: users!
+  user_id: uuid!
+}
+
+"""
+aggregated selection of "comments"
+"""
+type comments_aggregate {
+  aggregate: comments_aggregate_fields
+  nodes: [comments!]!
+}
+
+input comments_aggregate_bool_exp {
+  count: comments_aggregate_bool_exp_count
+}
+
+input comments_aggregate_bool_exp_count {
+  arguments: [comments_select_column!]
+  distinct: Boolean
+  filter: comments_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "comments"
+"""
+type comments_aggregate_fields {
+  count(columns: [comments_select_column!], distinct: Boolean): Int!
+  max: comments_max_fields
+  min: comments_min_fields
+}
+
+"""
+order by aggregate values of table "comments"
+"""
+input comments_aggregate_order_by {
+  count: order_by
+  max: comments_max_order_by
+  min: comments_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "comments"
+"""
+input comments_arr_rel_insert_input {
+  data: [comments_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: comments_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "comments". All fields are combined with a logical 'AND'.
+"""
+input comments_bool_exp {
+  _and: [comments_bool_exp!]
+  _not: comments_bool_exp
+  _or: [comments_bool_exp!]
+  content: String_comparison_exp
+  created_at: timestamptz_comparison_exp
+  id: uuid_comparison_exp
+  tale: tales_bool_exp
+  tale_id: uuid_comparison_exp
+  updated_at: timestamptz_comparison_exp
+  user: users_bool_exp
+  user_id: uuid_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "comments"
+"""
+enum comments_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  comments_pkey
+}
+
+"""
+input type for inserting data into table "comments"
+"""
+input comments_insert_input {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  tale: tales_obj_rel_insert_input
+  tale_id: uuid
+  updated_at: timestamptz
+  user: users_obj_rel_insert_input
+  user_id: uuid
+}
+
+"""aggregate max on columns"""
+type comments_max_fields {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  tale_id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""
+order by max() on columns of table "comments"
+"""
+input comments_max_order_by {
+  content: order_by
+  created_at: order_by
+  id: order_by
+  tale_id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""aggregate min on columns"""
+type comments_min_fields {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  tale_id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""
+order by min() on columns of table "comments"
+"""
+input comments_min_order_by {
+  content: order_by
+  created_at: order_by
+  id: order_by
+  tale_id: order_by
+  updated_at: order_by
+  user_id: order_by
+}
+
+"""
+response of any mutation on the table "comments"
+"""
+type comments_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [comments!]!
+}
+
+"""
+on_conflict condition type for table "comments"
+"""
+input comments_on_conflict {
+  constraint: comments_constraint!
+  update_columns: [comments_update_column!]! = []
+  where: comments_bool_exp
+}
+
+"""Ordering options when selecting data from "comments"."""
+input comments_order_by {
+  content: order_by
+  created_at: order_by
+  id: order_by
+  tale: tales_order_by
+  tale_id: order_by
+  updated_at: order_by
+  user: users_order_by
+  user_id: order_by
+}
+
+"""primary key columns input for table: comments"""
+input comments_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "comments"
+"""
+enum comments_select_column {
+  """column name"""
+  content
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+
+  """column name"""
+  tale_id
+
+  """column name"""
+  updated_at
+
+  """column name"""
+  user_id
+}
+
+"""
+input type for updating data in table "comments"
+"""
+input comments_set_input {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  tale_id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""
+Streaming cursor of the table "comments"
+"""
+input comments_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: comments_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input comments_stream_cursor_value_input {
+  content: String
+  created_at: timestamptz
+  id: uuid
+  tale_id: uuid
+  updated_at: timestamptz
+  user_id: uuid
+}
+
+"""
+update columns of table "comments"
+"""
+enum comments_update_column {
+  """column name"""
+  content
+
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+
+  """column name"""
+  tale_id
+
+  """column name"""
+  updated_at
+
+  """column name"""
+  user_id
+}
+
+input comments_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: comments_set_input
+
+  """filter the rows which have to be updated"""
+  where: comments_bool_exp!
+}
+
+"""ordering argument of a cursor"""
+enum cursor_ordering {
+  """ascending ordering of the cursor"""
+  ASC
+
+  """descending ordering of the cursor"""
+  DESC
+}
+
+scalar date
+
+"""
+Boolean expression to compare columns of type "date". All fields are combined with logical 'AND'.
+"""
+input date_comparison_exp {
+  _eq: date
+  _gt: date
+  _gte: date
+  _in: [date!]
+  _is_null: Boolean
+  _lt: date
+  _lte: date
+  _neq: date
+  _nin: [date!]
+}
+
+"""
+columns and relationships of "family_accounts"
+"""
+type family_accounts {
+  """An array relationship"""
+  children(
+    """distinct select on columns"""
+    distinct_on: [children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [children_order_by!]
+
+    """filter the rows returned"""
+    where: children_bool_exp
+  ): [children!]!
+
+  """An aggregate relationship"""
+  children_aggregate(
+    """distinct select on columns"""
+    distinct_on: [children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [children_order_by!]
+
+    """filter the rows returned"""
+    where: children_bool_exp
+  ): children_aggregate!
+  created_at: timestamptz!
+
+  """An array relationship"""
+  guest_invites(
+    """distinct select on columns"""
+    distinct_on: [guest_invites_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [guest_invites_order_by!]
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): [guest_invites!]!
+
+  """An aggregate relationship"""
+  guest_invites_aggregate(
+    """distinct select on columns"""
+    distinct_on: [guest_invites_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [guest_invites_order_by!]
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): guest_invites_aggregate!
+  id: uuid!
+
+  """An array relationship"""
+  subscriptions(
+    """distinct select on columns"""
+    distinct_on: [subscriptions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [subscriptions_order_by!]
+
+    """filter the rows returned"""
+    where: subscriptions_bool_exp
+  ): [subscriptions!]!
+
+  """An aggregate relationship"""
+  subscriptions_aggregate(
+    """distinct select on columns"""
+    distinct_on: [subscriptions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [subscriptions_order_by!]
+
+    """filter the rows returned"""
+    where: subscriptions_bool_exp
+  ): subscriptions_aggregate!
+
+  """An array relationship"""
+  tales(
+    """distinct select on columns"""
+    distinct_on: [tales_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tales_order_by!]
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): [tales!]!
+
+  """An aggregate relationship"""
+  tales_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tales_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tales_order_by!]
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): tales_aggregate!
+
+  """An array relationship"""
+  users(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+
+  """An aggregate relationship"""
+  users_aggregate(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): users_aggregate!
+}
+
+"""
+aggregated selection of "family_accounts"
+"""
+type family_accounts_aggregate {
+  aggregate: family_accounts_aggregate_fields
+  nodes: [family_accounts!]!
+}
+
+"""
+aggregate fields of "family_accounts"
+"""
+type family_accounts_aggregate_fields {
+  count(columns: [family_accounts_select_column!], distinct: Boolean): Int!
+  max: family_accounts_max_fields
+  min: family_accounts_min_fields
+}
+
+"""
+Boolean expression to filter rows from the table "family_accounts". All fields are combined with a logical 'AND'.
+"""
+input family_accounts_bool_exp {
+  _and: [family_accounts_bool_exp!]
+  _not: family_accounts_bool_exp
+  _or: [family_accounts_bool_exp!]
+  children: children_bool_exp
+  children_aggregate: children_aggregate_bool_exp
+  created_at: timestamptz_comparison_exp
+  guest_invites: guest_invites_bool_exp
+  guest_invites_aggregate: guest_invites_aggregate_bool_exp
+  id: uuid_comparison_exp
+  subscriptions: subscriptions_bool_exp
+  subscriptions_aggregate: subscriptions_aggregate_bool_exp
+  tales: tales_bool_exp
+  tales_aggregate: tales_aggregate_bool_exp
+  users: users_bool_exp
+  users_aggregate: users_aggregate_bool_exp
+}
+
+"""
+unique or primary key constraints on table "family_accounts"
+"""
+enum family_accounts_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  family_accounts_pkey
+}
+
+"""
+input type for inserting data into table "family_accounts"
+"""
+input family_accounts_insert_input {
+  children: children_arr_rel_insert_input
+  created_at: timestamptz
+  guest_invites: guest_invites_arr_rel_insert_input
+  id: uuid
+  subscriptions: subscriptions_arr_rel_insert_input
+  tales: tales_arr_rel_insert_input
+  users: users_arr_rel_insert_input
+}
+
+"""aggregate max on columns"""
+type family_accounts_max_fields {
+  created_at: timestamptz
+  id: uuid
+}
+
+"""aggregate min on columns"""
+type family_accounts_min_fields {
+  created_at: timestamptz
+  id: uuid
+}
+
+"""
+response of any mutation on the table "family_accounts"
+"""
+type family_accounts_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [family_accounts!]!
+}
+
+"""
+input type for inserting object relation for remote table "family_accounts"
+"""
+input family_accounts_obj_rel_insert_input {
+  data: family_accounts_insert_input!
+
+  """upsert condition"""
+  on_conflict: family_accounts_on_conflict
+}
+
+"""
+on_conflict condition type for table "family_accounts"
+"""
+input family_accounts_on_conflict {
+  constraint: family_accounts_constraint!
+  update_columns: [family_accounts_update_column!]! = []
+  where: family_accounts_bool_exp
+}
+
+"""Ordering options when selecting data from "family_accounts"."""
+input family_accounts_order_by {
+  children_aggregate: children_aggregate_order_by
+  created_at: order_by
+  guest_invites_aggregate: guest_invites_aggregate_order_by
+  id: order_by
+  subscriptions_aggregate: subscriptions_aggregate_order_by
+  tales_aggregate: tales_aggregate_order_by
+  users_aggregate: users_aggregate_order_by
+}
+
+"""primary key columns input for table: family_accounts"""
+input family_accounts_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "family_accounts"
+"""
+enum family_accounts_select_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+}
+
+"""
+input type for updating data in table "family_accounts"
+"""
+input family_accounts_set_input {
+  created_at: timestamptz
+  id: uuid
+}
+
+"""
+Streaming cursor of the table "family_accounts"
+"""
+input family_accounts_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: family_accounts_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input family_accounts_stream_cursor_value_input {
+  created_at: timestamptz
+  id: uuid
+}
+
+"""
+update columns of table "family_accounts"
+"""
+enum family_accounts_update_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  id
+}
+
+input family_accounts_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: family_accounts_set_input
+
+  """filter the rows which have to be updated"""
+  where: family_accounts_bool_exp!
+}
+
+"""
+columns and relationships of "family_tale_counts"
+"""
+type family_tale_counts {
+  family_account_id: uuid
+  tale_count: bigint
+}
+
+"""
+aggregated selection of "family_tale_counts"
+"""
+type family_tale_counts_aggregate {
+  aggregate: family_tale_counts_aggregate_fields
+  nodes: [family_tale_counts!]!
+}
+
+"""
+aggregate fields of "family_tale_counts"
+"""
+type family_tale_counts_aggregate_fields {
+  avg: family_tale_counts_avg_fields
+  count(columns: [family_tale_counts_select_column!], distinct: Boolean): Int!
+  max: family_tale_counts_max_fields
+  min: family_tale_counts_min_fields
+  stddev: family_tale_counts_stddev_fields
+  stddev_pop: family_tale_counts_stddev_pop_fields
+  stddev_samp: family_tale_counts_stddev_samp_fields
+  sum: family_tale_counts_sum_fields
+  var_pop: family_tale_counts_var_pop_fields
+  var_samp: family_tale_counts_var_samp_fields
+  variance: family_tale_counts_variance_fields
+}
+
+"""aggregate avg on columns"""
+type family_tale_counts_avg_fields {
+  tale_count: Float
+}
+
+"""
+Boolean expression to filter rows from the table "family_tale_counts". All fields are combined with a logical 'AND'.
+"""
+input family_tale_counts_bool_exp {
+  _and: [family_tale_counts_bool_exp!]
+  _not: family_tale_counts_bool_exp
+  _or: [family_tale_counts_bool_exp!]
+  family_account_id: uuid_comparison_exp
+  tale_count: bigint_comparison_exp
+}
+
+"""aggregate max on columns"""
+type family_tale_counts_max_fields {
+  family_account_id: uuid
+  tale_count: bigint
+}
+
+"""aggregate min on columns"""
+type family_tale_counts_min_fields {
+  family_account_id: uuid
+  tale_count: bigint
+}
+
+"""Ordering options when selecting data from "family_tale_counts"."""
+input family_tale_counts_order_by {
+  family_account_id: order_by
+  tale_count: order_by
+}
+
+"""
+select columns of table "family_tale_counts"
+"""
+enum family_tale_counts_select_column {
+  """column name"""
+  family_account_id
+
+  """column name"""
+  tale_count
+}
+
+"""aggregate stddev on columns"""
+type family_tale_counts_stddev_fields {
+  tale_count: Float
+}
+
+"""aggregate stddev_pop on columns"""
+type family_tale_counts_stddev_pop_fields {
+  tale_count: Float
+}
+
+"""aggregate stddev_samp on columns"""
+type family_tale_counts_stddev_samp_fields {
+  tale_count: Float
+}
+
+"""
+Streaming cursor of the table "family_tale_counts"
+"""
+input family_tale_counts_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: family_tale_counts_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input family_tale_counts_stream_cursor_value_input {
+  family_account_id: uuid
+  tale_count: bigint
+}
+
+"""aggregate sum on columns"""
+type family_tale_counts_sum_fields {
+  tale_count: bigint
+}
+
+"""aggregate var_pop on columns"""
+type family_tale_counts_var_pop_fields {
+  tale_count: Float
+}
+
+"""aggregate var_samp on columns"""
+type family_tale_counts_var_samp_fields {
+  tale_count: Float
+}
+
+"""aggregate variance on columns"""
+type family_tale_counts_variance_fields {
+  tale_count: Float
+}
+
+"""
+columns and relationships of "guest_invites"
+"""
+type guest_invites {
+  created_at: timestamptz!
+  email: String
+
+  """An object relationship"""
+  family_account: family_accounts!
+  family_account_id: uuid!
+  id: uuid!
+  invited_by: uuid!
+  status: String!
+  token: String!
+
+  """An object relationship"""
+  user: users!
+}
+
+"""
+aggregated selection of "guest_invites"
+"""
+type guest_invites_aggregate {
+  aggregate: guest_invites_aggregate_fields
+  nodes: [guest_invites!]!
+}
+
+input guest_invites_aggregate_bool_exp {
+  count: guest_invites_aggregate_bool_exp_count
+}
+
+input guest_invites_aggregate_bool_exp_count {
+  arguments: [guest_invites_select_column!]
+  distinct: Boolean
+  filter: guest_invites_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "guest_invites"
+"""
+type guest_invites_aggregate_fields {
+  count(columns: [guest_invites_select_column!], distinct: Boolean): Int!
+  max: guest_invites_max_fields
+  min: guest_invites_min_fields
+}
+
+"""
+order by aggregate values of table "guest_invites"
+"""
+input guest_invites_aggregate_order_by {
+  count: order_by
+  max: guest_invites_max_order_by
+  min: guest_invites_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "guest_invites"
+"""
+input guest_invites_arr_rel_insert_input {
+  data: [guest_invites_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: guest_invites_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "guest_invites". All fields are combined with a logical 'AND'.
+"""
+input guest_invites_bool_exp {
+  _and: [guest_invites_bool_exp!]
+  _not: guest_invites_bool_exp
+  _or: [guest_invites_bool_exp!]
+  created_at: timestamptz_comparison_exp
+  email: String_comparison_exp
+  family_account: family_accounts_bool_exp
+  family_account_id: uuid_comparison_exp
+  id: uuid_comparison_exp
+  invited_by: uuid_comparison_exp
+  status: String_comparison_exp
+  token: String_comparison_exp
+  user: users_bool_exp
+}
+
+"""
+unique or primary key constraints on table "guest_invites"
+"""
+enum guest_invites_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  guest_invites_pkey
+
+  """
+  unique or primary key constraint on columns "token"
+  """
+  guest_invites_token_key
+}
+
+"""
+input type for inserting data into table "guest_invites"
+"""
+input guest_invites_insert_input {
+  created_at: timestamptz
+  email: String
+  family_account: family_accounts_obj_rel_insert_input
+  family_account_id: uuid
+  id: uuid
+  invited_by: uuid
+  status: String
+  token: String
+  user: users_obj_rel_insert_input
+}
+
+"""aggregate max on columns"""
+type guest_invites_max_fields {
+  created_at: timestamptz
+  email: String
+  family_account_id: uuid
+  id: uuid
+  invited_by: uuid
+  status: String
+  token: String
+}
+
+"""
+order by max() on columns of table "guest_invites"
+"""
+input guest_invites_max_order_by {
+  created_at: order_by
+  email: order_by
+  family_account_id: order_by
+  id: order_by
+  invited_by: order_by
+  status: order_by
+  token: order_by
+}
+
+"""aggregate min on columns"""
+type guest_invites_min_fields {
+  created_at: timestamptz
+  email: String
+  family_account_id: uuid
+  id: uuid
+  invited_by: uuid
+  status: String
+  token: String
+}
+
+"""
+order by min() on columns of table "guest_invites"
+"""
+input guest_invites_min_order_by {
+  created_at: order_by
+  email: order_by
+  family_account_id: order_by
+  id: order_by
+  invited_by: order_by
+  status: order_by
+  token: order_by
+}
+
+"""
+response of any mutation on the table "guest_invites"
+"""
+type guest_invites_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [guest_invites!]!
+}
+
+"""
+on_conflict condition type for table "guest_invites"
+"""
+input guest_invites_on_conflict {
+  constraint: guest_invites_constraint!
+  update_columns: [guest_invites_update_column!]! = []
+  where: guest_invites_bool_exp
+}
+
+"""Ordering options when selecting data from "guest_invites"."""
+input guest_invites_order_by {
+  created_at: order_by
+  email: order_by
+  family_account: family_accounts_order_by
+  family_account_id: order_by
+  id: order_by
+  invited_by: order_by
+  status: order_by
+  token: order_by
+  user: users_order_by
+}
+
+"""primary key columns input for table: guest_invites"""
+input guest_invites_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "guest_invites"
+"""
+enum guest_invites_select_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  email
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  id
+
+  """column name"""
+  invited_by
+
+  """column name"""
+  status
+
+  """column name"""
+  token
+}
+
+"""
+input type for updating data in table "guest_invites"
+"""
+input guest_invites_set_input {
+  created_at: timestamptz
+  email: String
+  family_account_id: uuid
+  id: uuid
+  invited_by: uuid
+  status: String
+  token: String
+}
+
+"""
+Streaming cursor of the table "guest_invites"
+"""
+input guest_invites_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: guest_invites_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input guest_invites_stream_cursor_value_input {
+  created_at: timestamptz
+  email: String
+  family_account_id: uuid
+  id: uuid
+  invited_by: uuid
+  status: String
+  token: String
+}
+
+"""
+update columns of table "guest_invites"
+"""
+enum guest_invites_update_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  email
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  id
+
+  """column name"""
+  invited_by
+
+  """column name"""
+  status
+
+  """column name"""
+  token
+}
+
+input guest_invites_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: guest_invites_set_input
+
+  """filter the rows which have to be updated"""
+  where: guest_invites_bool_exp!
+}
+
+"""mutation root"""
+type mutation_root {
+  """
+  delete data from the table: "children"
+  """
+  delete_children(
+    """filter the rows which have to be deleted"""
+    where: children_bool_exp!
+  ): children_mutation_response
+
+  """
+  delete single row from the table: "children"
+  """
+  delete_children_by_pk(id: uuid!): children
+
+  """
+  delete data from the table: "comments"
+  """
+  delete_comments(
+    """filter the rows which have to be deleted"""
+    where: comments_bool_exp!
+  ): comments_mutation_response
+
+  """
+  delete single row from the table: "comments"
+  """
+  delete_comments_by_pk(id: uuid!): comments
+
+  """
+  delete data from the table: "family_accounts"
+  """
+  delete_family_accounts(
+    """filter the rows which have to be deleted"""
+    where: family_accounts_bool_exp!
+  ): family_accounts_mutation_response
+
+  """
+  delete single row from the table: "family_accounts"
+  """
+  delete_family_accounts_by_pk(id: uuid!): family_accounts
+
+  """
+  delete data from the table: "guest_invites"
+  """
+  delete_guest_invites(
+    """filter the rows which have to be deleted"""
+    where: guest_invites_bool_exp!
+  ): guest_invites_mutation_response
+
+  """
+  delete single row from the table: "guest_invites"
+  """
+  delete_guest_invites_by_pk(id: uuid!): guest_invites
+
+  """
+  delete data from the table: "reactions"
+  """
+  delete_reactions(
+    """filter the rows which have to be deleted"""
+    where: reactions_bool_exp!
+  ): reactions_mutation_response
+
+  """
+  delete single row from the table: "reactions"
+  """
+  delete_reactions_by_pk(id: uuid!): reactions
+
+  """
+  delete data from the table: "subscriptions"
+  """
+  delete_subscriptions(
+    """filter the rows which have to be deleted"""
+    where: subscriptions_bool_exp!
+  ): subscriptions_mutation_response
+
+  """
+  delete single row from the table: "subscriptions"
+  """
+  delete_subscriptions_by_pk(id: uuid!): subscriptions
+
+  """
+  delete data from the table: "tale_children"
+  """
+  delete_tale_children(
+    """filter the rows which have to be deleted"""
+    where: tale_children_bool_exp!
+  ): tale_children_mutation_response
+
+  """
+  delete single row from the table: "tale_children"
+  """
+  delete_tale_children_by_pk(child_id: uuid!, tale_id: uuid!): tale_children
+
+  """
+  delete data from the table: "tale_media"
+  """
+  delete_tale_media(
+    """filter the rows which have to be deleted"""
+    where: tale_media_bool_exp!
+  ): tale_media_mutation_response
+
+  """
+  delete single row from the table: "tale_media"
+  """
+  delete_tale_media_by_pk(id: uuid!): tale_media
+
+  """
+  delete data from the table: "tale_tags"
+  """
+  delete_tale_tags(
+    """filter the rows which have to be deleted"""
+    where: tale_tags_bool_exp!
+  ): tale_tags_mutation_response
+
+  """
+  delete single row from the table: "tale_tags"
+  """
+  delete_tale_tags_by_pk(id: uuid!): tale_tags
+
+  """
+  delete data from the table: "tales"
+  """
+  delete_tales(
+    """filter the rows which have to be deleted"""
+    where: tales_bool_exp!
+  ): tales_mutation_response
+
+  """
+  delete single row from the table: "tales"
+  """
+  delete_tales_by_pk(id: uuid!): tales
+
+  """
+  delete data from the table: "users"
+  """
+  delete_users(
+    """filter the rows which have to be deleted"""
+    where: users_bool_exp!
+  ): users_mutation_response
+
+  """
+  delete single row from the table: "users"
+  """
+  delete_users_by_pk(id: uuid!): users
+
+  """
+  insert data into the table: "children"
+  """
+  insert_children(
+    """the rows to be inserted"""
+    objects: [children_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: children_on_conflict
+  ): children_mutation_response
+
+  """
+  insert a single row into the table: "children"
+  """
+  insert_children_one(
+    """the row to be inserted"""
+    object: children_insert_input!
+
+    """upsert condition"""
+    on_conflict: children_on_conflict
+  ): children
+
+  """
+  insert data into the table: "comments"
+  """
+  insert_comments(
+    """the rows to be inserted"""
+    objects: [comments_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: comments_on_conflict
+  ): comments_mutation_response
+
+  """
+  insert a single row into the table: "comments"
+  """
+  insert_comments_one(
+    """the row to be inserted"""
+    object: comments_insert_input!
+
+    """upsert condition"""
+    on_conflict: comments_on_conflict
+  ): comments
+
+  """
+  insert data into the table: "family_accounts"
+  """
+  insert_family_accounts(
+    """the rows to be inserted"""
+    objects: [family_accounts_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: family_accounts_on_conflict
+  ): family_accounts_mutation_response
+
+  """
+  insert a single row into the table: "family_accounts"
+  """
+  insert_family_accounts_one(
+    """the row to be inserted"""
+    object: family_accounts_insert_input!
+
+    """upsert condition"""
+    on_conflict: family_accounts_on_conflict
+  ): family_accounts
+
+  """
+  insert data into the table: "guest_invites"
+  """
+  insert_guest_invites(
+    """the rows to be inserted"""
+    objects: [guest_invites_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: guest_invites_on_conflict
+  ): guest_invites_mutation_response
+
+  """
+  insert a single row into the table: "guest_invites"
+  """
+  insert_guest_invites_one(
+    """the row to be inserted"""
+    object: guest_invites_insert_input!
+
+    """upsert condition"""
+    on_conflict: guest_invites_on_conflict
+  ): guest_invites
+
+  """
+  insert data into the table: "reactions"
+  """
+  insert_reactions(
+    """the rows to be inserted"""
+    objects: [reactions_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: reactions_on_conflict
+  ): reactions_mutation_response
+
+  """
+  insert a single row into the table: "reactions"
+  """
+  insert_reactions_one(
+    """the row to be inserted"""
+    object: reactions_insert_input!
+
+    """upsert condition"""
+    on_conflict: reactions_on_conflict
+  ): reactions
+
+  """
+  insert data into the table: "subscriptions"
+  """
+  insert_subscriptions(
+    """the rows to be inserted"""
+    objects: [subscriptions_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: subscriptions_on_conflict
+  ): subscriptions_mutation_response
+
+  """
+  insert a single row into the table: "subscriptions"
+  """
+  insert_subscriptions_one(
+    """the row to be inserted"""
+    object: subscriptions_insert_input!
+
+    """upsert condition"""
+    on_conflict: subscriptions_on_conflict
+  ): subscriptions
+
+  """
+  insert data into the table: "tale_children"
+  """
+  insert_tale_children(
+    """the rows to be inserted"""
+    objects: [tale_children_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: tale_children_on_conflict
+  ): tale_children_mutation_response
+
+  """
+  insert a single row into the table: "tale_children"
+  """
+  insert_tale_children_one(
+    """the row to be inserted"""
+    object: tale_children_insert_input!
+
+    """upsert condition"""
+    on_conflict: tale_children_on_conflict
+  ): tale_children
+
+  """
+  insert data into the table: "tale_media"
+  """
+  insert_tale_media(
+    """the rows to be inserted"""
+    objects: [tale_media_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: tale_media_on_conflict
+  ): tale_media_mutation_response
+
+  """
+  insert a single row into the table: "tale_media"
+  """
+  insert_tale_media_one(
+    """the row to be inserted"""
+    object: tale_media_insert_input!
+
+    """upsert condition"""
+    on_conflict: tale_media_on_conflict
+  ): tale_media
+
+  """
+  insert data into the table: "tale_tags"
+  """
+  insert_tale_tags(
+    """the rows to be inserted"""
+    objects: [tale_tags_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: tale_tags_on_conflict
+  ): tale_tags_mutation_response
+
+  """
+  insert a single row into the table: "tale_tags"
+  """
+  insert_tale_tags_one(
+    """the row to be inserted"""
+    object: tale_tags_insert_input!
+
+    """upsert condition"""
+    on_conflict: tale_tags_on_conflict
+  ): tale_tags
+
+  """
+  insert data into the table: "tales"
+  """
+  insert_tales(
+    """the rows to be inserted"""
+    objects: [tales_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: tales_on_conflict
+  ): tales_mutation_response
+
+  """
+  insert a single row into the table: "tales"
+  """
+  insert_tales_one(
+    """the row to be inserted"""
+    object: tales_insert_input!
+
+    """upsert condition"""
+    on_conflict: tales_on_conflict
+  ): tales
+
+  """
+  insert data into the table: "users"
+  """
+  insert_users(
+    """the rows to be inserted"""
+    objects: [users_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: users_on_conflict
+  ): users_mutation_response
+
+  """
+  insert a single row into the table: "users"
+  """
+  insert_users_one(
+    """the row to be inserted"""
+    object: users_insert_input!
+
+    """upsert condition"""
+    on_conflict: users_on_conflict
+  ): users
+
+  """
+  update data of the table: "children"
+  """
+  update_children(
+    """sets the columns of the filtered rows to the given values"""
+    _set: children_set_input
+
+    """filter the rows which have to be updated"""
+    where: children_bool_exp!
+  ): children_mutation_response
+
+  """
+  update single row of the table: "children"
+  """
+  update_children_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: children_set_input
+    pk_columns: children_pk_columns_input!
+  ): children
+
+  """
+  update multiples rows of table: "children"
+  """
+  update_children_many(
+    """updates to execute, in order"""
+    updates: [children_updates!]!
+  ): [children_mutation_response]
+
+  """
+  update data of the table: "comments"
+  """
+  update_comments(
+    """sets the columns of the filtered rows to the given values"""
+    _set: comments_set_input
+
+    """filter the rows which have to be updated"""
+    where: comments_bool_exp!
+  ): comments_mutation_response
+
+  """
+  update single row of the table: "comments"
+  """
+  update_comments_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: comments_set_input
+    pk_columns: comments_pk_columns_input!
+  ): comments
+
+  """
+  update multiples rows of table: "comments"
+  """
+  update_comments_many(
+    """updates to execute, in order"""
+    updates: [comments_updates!]!
+  ): [comments_mutation_response]
+
+  """
+  update data of the table: "family_accounts"
+  """
+  update_family_accounts(
+    """sets the columns of the filtered rows to the given values"""
+    _set: family_accounts_set_input
+
+    """filter the rows which have to be updated"""
+    where: family_accounts_bool_exp!
+  ): family_accounts_mutation_response
+
+  """
+  update single row of the table: "family_accounts"
+  """
+  update_family_accounts_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: family_accounts_set_input
+    pk_columns: family_accounts_pk_columns_input!
+  ): family_accounts
+
+  """
+  update multiples rows of table: "family_accounts"
+  """
+  update_family_accounts_many(
+    """updates to execute, in order"""
+    updates: [family_accounts_updates!]!
+  ): [family_accounts_mutation_response]
+
+  """
+  update data of the table: "guest_invites"
+  """
+  update_guest_invites(
+    """sets the columns of the filtered rows to the given values"""
+    _set: guest_invites_set_input
+
+    """filter the rows which have to be updated"""
+    where: guest_invites_bool_exp!
+  ): guest_invites_mutation_response
+
+  """
+  update single row of the table: "guest_invites"
+  """
+  update_guest_invites_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: guest_invites_set_input
+    pk_columns: guest_invites_pk_columns_input!
+  ): guest_invites
+
+  """
+  update multiples rows of table: "guest_invites"
+  """
+  update_guest_invites_many(
+    """updates to execute, in order"""
+    updates: [guest_invites_updates!]!
+  ): [guest_invites_mutation_response]
+
+  """
+  update data of the table: "reactions"
+  """
+  update_reactions(
+    """sets the columns of the filtered rows to the given values"""
+    _set: reactions_set_input
+
+    """filter the rows which have to be updated"""
+    where: reactions_bool_exp!
+  ): reactions_mutation_response
+
+  """
+  update single row of the table: "reactions"
+  """
+  update_reactions_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: reactions_set_input
+    pk_columns: reactions_pk_columns_input!
+  ): reactions
+
+  """
+  update multiples rows of table: "reactions"
+  """
+  update_reactions_many(
+    """updates to execute, in order"""
+    updates: [reactions_updates!]!
+  ): [reactions_mutation_response]
+
+  """
+  update data of the table: "subscriptions"
+  """
+  update_subscriptions(
+    """sets the columns of the filtered rows to the given values"""
+    _set: subscriptions_set_input
+
+    """filter the rows which have to be updated"""
+    where: subscriptions_bool_exp!
+  ): subscriptions_mutation_response
+
+  """
+  update single row of the table: "subscriptions"
+  """
+  update_subscriptions_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: subscriptions_set_input
+    pk_columns: subscriptions_pk_columns_input!
+  ): subscriptions
+
+  """
+  update multiples rows of table: "subscriptions"
+  """
+  update_subscriptions_many(
+    """updates to execute, in order"""
+    updates: [subscriptions_updates!]!
+  ): [subscriptions_mutation_response]
+
+  """
+  update data of the table: "tale_children"
+  """
+  update_tale_children(
+    """sets the columns of the filtered rows to the given values"""
+    _set: tale_children_set_input
+
+    """filter the rows which have to be updated"""
+    where: tale_children_bool_exp!
+  ): tale_children_mutation_response
+
+  """
+  update single row of the table: "tale_children"
+  """
+  update_tale_children_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: tale_children_set_input
+    pk_columns: tale_children_pk_columns_input!
+  ): tale_children
+
+  """
+  update multiples rows of table: "tale_children"
+  """
+  update_tale_children_many(
+    """updates to execute, in order"""
+    updates: [tale_children_updates!]!
+  ): [tale_children_mutation_response]
+
+  """
+  update data of the table: "tale_media"
+  """
+  update_tale_media(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: tale_media_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: tale_media_set_input
+
+    """filter the rows which have to be updated"""
+    where: tale_media_bool_exp!
+  ): tale_media_mutation_response
+
+  """
+  update single row of the table: "tale_media"
+  """
+  update_tale_media_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: tale_media_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: tale_media_set_input
+    pk_columns: tale_media_pk_columns_input!
+  ): tale_media
+
+  """
+  update multiples rows of table: "tale_media"
+  """
+  update_tale_media_many(
+    """updates to execute, in order"""
+    updates: [tale_media_updates!]!
+  ): [tale_media_mutation_response]
+
+  """
+  update data of the table: "tale_tags"
+  """
+  update_tale_tags(
+    """sets the columns of the filtered rows to the given values"""
+    _set: tale_tags_set_input
+
+    """filter the rows which have to be updated"""
+    where: tale_tags_bool_exp!
+  ): tale_tags_mutation_response
+
+  """
+  update single row of the table: "tale_tags"
+  """
+  update_tale_tags_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: tale_tags_set_input
+    pk_columns: tale_tags_pk_columns_input!
+  ): tale_tags
+
+  """
+  update multiples rows of table: "tale_tags"
+  """
+  update_tale_tags_many(
+    """updates to execute, in order"""
+    updates: [tale_tags_updates!]!
+  ): [tale_tags_mutation_response]
+
+  """
+  update data of the table: "tales"
+  """
+  update_tales(
+    """sets the columns of the filtered rows to the given values"""
+    _set: tales_set_input
+
+    """filter the rows which have to be updated"""
+    where: tales_bool_exp!
+  ): tales_mutation_response
+
+  """
+  update single row of the table: "tales"
+  """
+  update_tales_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: tales_set_input
+    pk_columns: tales_pk_columns_input!
+  ): tales
+
+  """
+  update multiples rows of table: "tales"
+  """
+  update_tales_many(
+    """updates to execute, in order"""
+    updates: [tales_updates!]!
+  ): [tales_mutation_response]
+
+  """
+  update data of the table: "users"
+  """
+  update_users(
+    """sets the columns of the filtered rows to the given values"""
+    _set: users_set_input
+
+    """filter the rows which have to be updated"""
+    where: users_bool_exp!
+  ): users_mutation_response
+
+  """
+  update single row of the table: "users"
+  """
+  update_users_by_pk(
+    """sets the columns of the filtered rows to the given values"""
+    _set: users_set_input
+    pk_columns: users_pk_columns_input!
+  ): users
+
+  """
+  update multiples rows of table: "users"
+  """
+  update_users_many(
+    """updates to execute, in order"""
+    updates: [users_updates!]!
+  ): [users_mutation_response]
+}
+
+"""column ordering options"""
+enum order_by {
+  """in ascending order, nulls last"""
+  asc
+
+  """in ascending order, nulls first"""
+  asc_nulls_first
+
+  """in ascending order, nulls last"""
+  asc_nulls_last
+
+  """in descending order, nulls first"""
+  desc
+
+  """in descending order, nulls first"""
+  desc_nulls_first
+
+  """in descending order, nulls last"""
+  desc_nulls_last
+}
+
+type query_root {
+  """An array relationship"""
+  children(
+    """distinct select on columns"""
+    distinct_on: [children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [children_order_by!]
+
+    """filter the rows returned"""
+    where: children_bool_exp
+  ): [children!]!
+
+  """An aggregate relationship"""
+  children_aggregate(
+    """distinct select on columns"""
+    distinct_on: [children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [children_order_by!]
+
+    """filter the rows returned"""
+    where: children_bool_exp
+  ): children_aggregate!
+
+  """fetch data from the table: "children" using primary key columns"""
+  children_by_pk(id: uuid!): children
+
+  """An array relationship"""
+  comments(
+    """distinct select on columns"""
+    distinct_on: [comments_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [comments_order_by!]
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): [comments!]!
+
+  """An aggregate relationship"""
+  comments_aggregate(
+    """distinct select on columns"""
+    distinct_on: [comments_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [comments_order_by!]
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): comments_aggregate!
+
+  """fetch data from the table: "comments" using primary key columns"""
+  comments_by_pk(id: uuid!): comments
+
+  """
+  fetch data from the table: "family_accounts"
+  """
+  family_accounts(
+    """distinct select on columns"""
+    distinct_on: [family_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [family_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: family_accounts_bool_exp
+  ): [family_accounts!]!
+
+  """
+  fetch aggregated fields from the table: "family_accounts"
+  """
+  family_accounts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [family_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [family_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: family_accounts_bool_exp
+  ): family_accounts_aggregate!
+
+  """fetch data from the table: "family_accounts" using primary key columns"""
+  family_accounts_by_pk(id: uuid!): family_accounts
+
+  """
+  fetch data from the table: "family_tale_counts"
+  """
+  family_tale_counts(
+    """distinct select on columns"""
+    distinct_on: [family_tale_counts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [family_tale_counts_order_by!]
+
+    """filter the rows returned"""
+    where: family_tale_counts_bool_exp
+  ): [family_tale_counts!]!
+
+  """
+  fetch aggregated fields from the table: "family_tale_counts"
+  """
+  family_tale_counts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [family_tale_counts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [family_tale_counts_order_by!]
+
+    """filter the rows returned"""
+    where: family_tale_counts_bool_exp
+  ): family_tale_counts_aggregate!
+
+  """An array relationship"""
+  guest_invites(
+    """distinct select on columns"""
+    distinct_on: [guest_invites_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [guest_invites_order_by!]
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): [guest_invites!]!
+
+  """An aggregate relationship"""
+  guest_invites_aggregate(
+    """distinct select on columns"""
+    distinct_on: [guest_invites_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [guest_invites_order_by!]
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): guest_invites_aggregate!
+
+  """fetch data from the table: "guest_invites" using primary key columns"""
+  guest_invites_by_pk(id: uuid!): guest_invites
+
+  """An array relationship"""
+  reactions(
+    """distinct select on columns"""
+    distinct_on: [reactions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reactions_order_by!]
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): [reactions!]!
+
+  """An aggregate relationship"""
+  reactions_aggregate(
+    """distinct select on columns"""
+    distinct_on: [reactions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reactions_order_by!]
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): reactions_aggregate!
+
+  """fetch data from the table: "reactions" using primary key columns"""
+  reactions_by_pk(id: uuid!): reactions
+
+  """An array relationship"""
+  subscriptions(
+    """distinct select on columns"""
+    distinct_on: [subscriptions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [subscriptions_order_by!]
+
+    """filter the rows returned"""
+    where: subscriptions_bool_exp
+  ): [subscriptions!]!
+
+  """An aggregate relationship"""
+  subscriptions_aggregate(
+    """distinct select on columns"""
+    distinct_on: [subscriptions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [subscriptions_order_by!]
+
+    """filter the rows returned"""
+    where: subscriptions_bool_exp
+  ): subscriptions_aggregate!
+
+  """fetch data from the table: "subscriptions" using primary key columns"""
+  subscriptions_by_pk(id: uuid!): subscriptions
+
+  """An array relationship"""
+  tale_children(
+    """distinct select on columns"""
+    distinct_on: [tale_children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_children_order_by!]
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): [tale_children!]!
+
+  """An aggregate relationship"""
+  tale_children_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_children_order_by!]
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): tale_children_aggregate!
+
+  """fetch data from the table: "tale_children" using primary key columns"""
+  tale_children_by_pk(child_id: uuid!, tale_id: uuid!): tale_children
+
+  """An array relationship"""
+  tale_media(
+    """distinct select on columns"""
+    distinct_on: [tale_media_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_media_order_by!]
+
+    """filter the rows returned"""
+    where: tale_media_bool_exp
+  ): [tale_media!]!
+
+  """An aggregate relationship"""
+  tale_media_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_media_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_media_order_by!]
+
+    """filter the rows returned"""
+    where: tale_media_bool_exp
+  ): tale_media_aggregate!
+
+  """fetch data from the table: "tale_media" using primary key columns"""
+  tale_media_by_pk(id: uuid!): tale_media
+
+  """An array relationship"""
+  tale_tags(
+    """distinct select on columns"""
+    distinct_on: [tale_tags_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_tags_order_by!]
+
+    """filter the rows returned"""
+    where: tale_tags_bool_exp
+  ): [tale_tags!]!
+
+  """An aggregate relationship"""
+  tale_tags_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_tags_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_tags_order_by!]
+
+    """filter the rows returned"""
+    where: tale_tags_bool_exp
+  ): tale_tags_aggregate!
+
+  """fetch data from the table: "tale_tags" using primary key columns"""
+  tale_tags_by_pk(id: uuid!): tale_tags
+
+  """An array relationship"""
+  tales(
+    """distinct select on columns"""
+    distinct_on: [tales_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tales_order_by!]
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): [tales!]!
+
+  """An aggregate relationship"""
+  tales_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tales_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tales_order_by!]
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): tales_aggregate!
+
+  """fetch data from the table: "tales" using primary key columns"""
+  tales_by_pk(id: uuid!): tales
+
+  """An array relationship"""
+  users(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+
+  """An aggregate relationship"""
+  users_aggregate(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): users_aggregate!
+
+  """fetch data from the table: "users" using primary key columns"""
+  users_by_pk(id: uuid!): users
+}
+
+"""
+columns and relationships of "reactions"
+"""
+type reactions {
+  created_at: timestamptz!
+  emoji: String!
+  id: uuid!
+
+  """An object relationship"""
+  tale: tales!
+  tale_id: uuid!
+
+  """An object relationship"""
+  user: users!
+  user_id: uuid!
+}
+
+"""
+aggregated selection of "reactions"
+"""
+type reactions_aggregate {
+  aggregate: reactions_aggregate_fields
+  nodes: [reactions!]!
+}
+
+input reactions_aggregate_bool_exp {
+  count: reactions_aggregate_bool_exp_count
+}
+
+input reactions_aggregate_bool_exp_count {
+  arguments: [reactions_select_column!]
+  distinct: Boolean
+  filter: reactions_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "reactions"
+"""
+type reactions_aggregate_fields {
+  count(columns: [reactions_select_column!], distinct: Boolean): Int!
+  max: reactions_max_fields
+  min: reactions_min_fields
+}
+
+"""
+order by aggregate values of table "reactions"
+"""
+input reactions_aggregate_order_by {
+  count: order_by
+  max: reactions_max_order_by
+  min: reactions_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "reactions"
+"""
+input reactions_arr_rel_insert_input {
+  data: [reactions_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: reactions_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "reactions". All fields are combined with a logical 'AND'.
+"""
+input reactions_bool_exp {
+  _and: [reactions_bool_exp!]
+  _not: reactions_bool_exp
+  _or: [reactions_bool_exp!]
+  created_at: timestamptz_comparison_exp
+  emoji: String_comparison_exp
+  id: uuid_comparison_exp
+  tale: tales_bool_exp
+  tale_id: uuid_comparison_exp
+  user: users_bool_exp
+  user_id: uuid_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "reactions"
+"""
+enum reactions_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  reactions_pkey
+
+  """
+  unique or primary key constraint on columns "user_id", "tale_id", "emoji"
+  """
+  reactions_tale_id_user_id_emoji_key
+}
+
+"""
+input type for inserting data into table "reactions"
+"""
+input reactions_insert_input {
+  created_at: timestamptz
+  emoji: String
+  id: uuid
+  tale: tales_obj_rel_insert_input
+  tale_id: uuid
+  user: users_obj_rel_insert_input
+  user_id: uuid
+}
+
+"""aggregate max on columns"""
+type reactions_max_fields {
+  created_at: timestamptz
+  emoji: String
+  id: uuid
+  tale_id: uuid
+  user_id: uuid
+}
+
+"""
+order by max() on columns of table "reactions"
+"""
+input reactions_max_order_by {
+  created_at: order_by
+  emoji: order_by
+  id: order_by
+  tale_id: order_by
+  user_id: order_by
+}
+
+"""aggregate min on columns"""
+type reactions_min_fields {
+  created_at: timestamptz
+  emoji: String
+  id: uuid
+  tale_id: uuid
+  user_id: uuid
+}
+
+"""
+order by min() on columns of table "reactions"
+"""
+input reactions_min_order_by {
+  created_at: order_by
+  emoji: order_by
+  id: order_by
+  tale_id: order_by
+  user_id: order_by
+}
+
+"""
+response of any mutation on the table "reactions"
+"""
+type reactions_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [reactions!]!
+}
+
+"""
+on_conflict condition type for table "reactions"
+"""
+input reactions_on_conflict {
+  constraint: reactions_constraint!
+  update_columns: [reactions_update_column!]! = []
+  where: reactions_bool_exp
+}
+
+"""Ordering options when selecting data from "reactions"."""
+input reactions_order_by {
+  created_at: order_by
+  emoji: order_by
+  id: order_by
+  tale: tales_order_by
+  tale_id: order_by
+  user: users_order_by
+  user_id: order_by
+}
+
+"""primary key columns input for table: reactions"""
+input reactions_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "reactions"
+"""
+enum reactions_select_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  emoji
+
+  """column name"""
+  id
+
+  """column name"""
+  tale_id
+
+  """column name"""
+  user_id
+}
+
+"""
+input type for updating data in table "reactions"
+"""
+input reactions_set_input {
+  created_at: timestamptz
+  emoji: String
+  id: uuid
+  tale_id: uuid
+  user_id: uuid
+}
+
+"""
+Streaming cursor of the table "reactions"
+"""
+input reactions_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: reactions_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input reactions_stream_cursor_value_input {
+  created_at: timestamptz
+  emoji: String
+  id: uuid
+  tale_id: uuid
+  user_id: uuid
+}
+
+"""
+update columns of table "reactions"
+"""
+enum reactions_update_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  emoji
+
+  """column name"""
+  id
+
+  """column name"""
+  tale_id
+
+  """column name"""
+  user_id
+}
+
+input reactions_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: reactions_set_input
+
+  """filter the rows which have to be updated"""
+  where: reactions_bool_exp!
+}
+
+type subscription_root {
+  """An array relationship"""
+  children(
+    """distinct select on columns"""
+    distinct_on: [children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [children_order_by!]
+
+    """filter the rows returned"""
+    where: children_bool_exp
+  ): [children!]!
+
+  """An aggregate relationship"""
+  children_aggregate(
+    """distinct select on columns"""
+    distinct_on: [children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [children_order_by!]
+
+    """filter the rows returned"""
+    where: children_bool_exp
+  ): children_aggregate!
+
+  """fetch data from the table: "children" using primary key columns"""
+  children_by_pk(id: uuid!): children
+
+  """
+  fetch data from the table in a streaming manner: "children"
+  """
+  children_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [children_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: children_bool_exp
+  ): [children!]!
+
+  """An array relationship"""
+  comments(
+    """distinct select on columns"""
+    distinct_on: [comments_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [comments_order_by!]
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): [comments!]!
+
+  """An aggregate relationship"""
+  comments_aggregate(
+    """distinct select on columns"""
+    distinct_on: [comments_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [comments_order_by!]
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): comments_aggregate!
+
+  """fetch data from the table: "comments" using primary key columns"""
+  comments_by_pk(id: uuid!): comments
+
+  """
+  fetch data from the table in a streaming manner: "comments"
+  """
+  comments_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [comments_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): [comments!]!
+
+  """
+  fetch data from the table: "family_accounts"
+  """
+  family_accounts(
+    """distinct select on columns"""
+    distinct_on: [family_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [family_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: family_accounts_bool_exp
+  ): [family_accounts!]!
+
+  """
+  fetch aggregated fields from the table: "family_accounts"
+  """
+  family_accounts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [family_accounts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [family_accounts_order_by!]
+
+    """filter the rows returned"""
+    where: family_accounts_bool_exp
+  ): family_accounts_aggregate!
+
+  """fetch data from the table: "family_accounts" using primary key columns"""
+  family_accounts_by_pk(id: uuid!): family_accounts
+
+  """
+  fetch data from the table in a streaming manner: "family_accounts"
+  """
+  family_accounts_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [family_accounts_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: family_accounts_bool_exp
+  ): [family_accounts!]!
+
+  """
+  fetch data from the table: "family_tale_counts"
+  """
+  family_tale_counts(
+    """distinct select on columns"""
+    distinct_on: [family_tale_counts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [family_tale_counts_order_by!]
+
+    """filter the rows returned"""
+    where: family_tale_counts_bool_exp
+  ): [family_tale_counts!]!
+
+  """
+  fetch aggregated fields from the table: "family_tale_counts"
+  """
+  family_tale_counts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [family_tale_counts_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [family_tale_counts_order_by!]
+
+    """filter the rows returned"""
+    where: family_tale_counts_bool_exp
+  ): family_tale_counts_aggregate!
+
+  """
+  fetch data from the table in a streaming manner: "family_tale_counts"
+  """
+  family_tale_counts_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [family_tale_counts_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: family_tale_counts_bool_exp
+  ): [family_tale_counts!]!
+
+  """An array relationship"""
+  guest_invites(
+    """distinct select on columns"""
+    distinct_on: [guest_invites_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [guest_invites_order_by!]
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): [guest_invites!]!
+
+  """An aggregate relationship"""
+  guest_invites_aggregate(
+    """distinct select on columns"""
+    distinct_on: [guest_invites_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [guest_invites_order_by!]
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): guest_invites_aggregate!
+
+  """fetch data from the table: "guest_invites" using primary key columns"""
+  guest_invites_by_pk(id: uuid!): guest_invites
+
+  """
+  fetch data from the table in a streaming manner: "guest_invites"
+  """
+  guest_invites_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [guest_invites_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): [guest_invites!]!
+
+  """An array relationship"""
+  reactions(
+    """distinct select on columns"""
+    distinct_on: [reactions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reactions_order_by!]
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): [reactions!]!
+
+  """An aggregate relationship"""
+  reactions_aggregate(
+    """distinct select on columns"""
+    distinct_on: [reactions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reactions_order_by!]
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): reactions_aggregate!
+
+  """fetch data from the table: "reactions" using primary key columns"""
+  reactions_by_pk(id: uuid!): reactions
+
+  """
+  fetch data from the table in a streaming manner: "reactions"
+  """
+  reactions_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [reactions_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): [reactions!]!
+
+  """An array relationship"""
+  subscriptions(
+    """distinct select on columns"""
+    distinct_on: [subscriptions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [subscriptions_order_by!]
+
+    """filter the rows returned"""
+    where: subscriptions_bool_exp
+  ): [subscriptions!]!
+
+  """An aggregate relationship"""
+  subscriptions_aggregate(
+    """distinct select on columns"""
+    distinct_on: [subscriptions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [subscriptions_order_by!]
+
+    """filter the rows returned"""
+    where: subscriptions_bool_exp
+  ): subscriptions_aggregate!
+
+  """fetch data from the table: "subscriptions" using primary key columns"""
+  subscriptions_by_pk(id: uuid!): subscriptions
+
+  """
+  fetch data from the table in a streaming manner: "subscriptions"
+  """
+  subscriptions_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [subscriptions_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: subscriptions_bool_exp
+  ): [subscriptions!]!
+
+  """An array relationship"""
+  tale_children(
+    """distinct select on columns"""
+    distinct_on: [tale_children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_children_order_by!]
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): [tale_children!]!
+
+  """An aggregate relationship"""
+  tale_children_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_children_order_by!]
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): tale_children_aggregate!
+
+  """fetch data from the table: "tale_children" using primary key columns"""
+  tale_children_by_pk(child_id: uuid!, tale_id: uuid!): tale_children
+
+  """
+  fetch data from the table in a streaming manner: "tale_children"
+  """
+  tale_children_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [tale_children_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): [tale_children!]!
+
+  """An array relationship"""
+  tale_media(
+    """distinct select on columns"""
+    distinct_on: [tale_media_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_media_order_by!]
+
+    """filter the rows returned"""
+    where: tale_media_bool_exp
+  ): [tale_media!]!
+
+  """An aggregate relationship"""
+  tale_media_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_media_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_media_order_by!]
+
+    """filter the rows returned"""
+    where: tale_media_bool_exp
+  ): tale_media_aggregate!
+
+  """fetch data from the table: "tale_media" using primary key columns"""
+  tale_media_by_pk(id: uuid!): tale_media
+
+  """
+  fetch data from the table in a streaming manner: "tale_media"
+  """
+  tale_media_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [tale_media_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: tale_media_bool_exp
+  ): [tale_media!]!
+
+  """An array relationship"""
+  tale_tags(
+    """distinct select on columns"""
+    distinct_on: [tale_tags_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_tags_order_by!]
+
+    """filter the rows returned"""
+    where: tale_tags_bool_exp
+  ): [tale_tags!]!
+
+  """An aggregate relationship"""
+  tale_tags_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_tags_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_tags_order_by!]
+
+    """filter the rows returned"""
+    where: tale_tags_bool_exp
+  ): tale_tags_aggregate!
+
+  """fetch data from the table: "tale_tags" using primary key columns"""
+  tale_tags_by_pk(id: uuid!): tale_tags
+
+  """
+  fetch data from the table in a streaming manner: "tale_tags"
+  """
+  tale_tags_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [tale_tags_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: tale_tags_bool_exp
+  ): [tale_tags!]!
+
+  """An array relationship"""
+  tales(
+    """distinct select on columns"""
+    distinct_on: [tales_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tales_order_by!]
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): [tales!]!
+
+  """An aggregate relationship"""
+  tales_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tales_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tales_order_by!]
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): tales_aggregate!
+
+  """fetch data from the table: "tales" using primary key columns"""
+  tales_by_pk(id: uuid!): tales
+
+  """
+  fetch data from the table in a streaming manner: "tales"
+  """
+  tales_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [tales_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): [tales!]!
+
+  """An array relationship"""
+  users(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+
+  """An aggregate relationship"""
+  users_aggregate(
+    """distinct select on columns"""
+    distinct_on: [users_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [users_order_by!]
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): users_aggregate!
+
+  """fetch data from the table: "users" using primary key columns"""
+  users_by_pk(id: uuid!): users
+
+  """
+  fetch data from the table in a streaming manner: "users"
+  """
+  users_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [users_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: users_bool_exp
+  ): [users!]!
+}
+
+"""
+columns and relationships of "subscriptions"
+"""
+type subscriptions {
+  created_at: timestamptz!
+  expires_at: timestamptz
+
+  """An object relationship"""
+  family_account: family_accounts!
+  family_account_id: uuid!
+  id: uuid!
+  platform: String
+  status: String!
+}
+
+"""
+aggregated selection of "subscriptions"
+"""
+type subscriptions_aggregate {
+  aggregate: subscriptions_aggregate_fields
+  nodes: [subscriptions!]!
+}
+
+input subscriptions_aggregate_bool_exp {
+  count: subscriptions_aggregate_bool_exp_count
+}
+
+input subscriptions_aggregate_bool_exp_count {
+  arguments: [subscriptions_select_column!]
+  distinct: Boolean
+  filter: subscriptions_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "subscriptions"
+"""
+type subscriptions_aggregate_fields {
+  count(columns: [subscriptions_select_column!], distinct: Boolean): Int!
+  max: subscriptions_max_fields
+  min: subscriptions_min_fields
+}
+
+"""
+order by aggregate values of table "subscriptions"
+"""
+input subscriptions_aggregate_order_by {
+  count: order_by
+  max: subscriptions_max_order_by
+  min: subscriptions_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "subscriptions"
+"""
+input subscriptions_arr_rel_insert_input {
+  data: [subscriptions_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: subscriptions_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "subscriptions". All fields are combined with a logical 'AND'.
+"""
+input subscriptions_bool_exp {
+  _and: [subscriptions_bool_exp!]
+  _not: subscriptions_bool_exp
+  _or: [subscriptions_bool_exp!]
+  created_at: timestamptz_comparison_exp
+  expires_at: timestamptz_comparison_exp
+  family_account: family_accounts_bool_exp
+  family_account_id: uuid_comparison_exp
+  id: uuid_comparison_exp
+  platform: String_comparison_exp
+  status: String_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "subscriptions"
+"""
+enum subscriptions_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  subscriptions_pkey
+}
+
+"""
+input type for inserting data into table "subscriptions"
+"""
+input subscriptions_insert_input {
+  created_at: timestamptz
+  expires_at: timestamptz
+  family_account: family_accounts_obj_rel_insert_input
+  family_account_id: uuid
+  id: uuid
+  platform: String
+  status: String
+}
+
+"""aggregate max on columns"""
+type subscriptions_max_fields {
+  created_at: timestamptz
+  expires_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  platform: String
+  status: String
+}
+
+"""
+order by max() on columns of table "subscriptions"
+"""
+input subscriptions_max_order_by {
+  created_at: order_by
+  expires_at: order_by
+  family_account_id: order_by
+  id: order_by
+  platform: order_by
+  status: order_by
+}
+
+"""aggregate min on columns"""
+type subscriptions_min_fields {
+  created_at: timestamptz
+  expires_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  platform: String
+  status: String
+}
+
+"""
+order by min() on columns of table "subscriptions"
+"""
+input subscriptions_min_order_by {
+  created_at: order_by
+  expires_at: order_by
+  family_account_id: order_by
+  id: order_by
+  platform: order_by
+  status: order_by
+}
+
+"""
+response of any mutation on the table "subscriptions"
+"""
+type subscriptions_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [subscriptions!]!
+}
+
+"""
+on_conflict condition type for table "subscriptions"
+"""
+input subscriptions_on_conflict {
+  constraint: subscriptions_constraint!
+  update_columns: [subscriptions_update_column!]! = []
+  where: subscriptions_bool_exp
+}
+
+"""Ordering options when selecting data from "subscriptions"."""
+input subscriptions_order_by {
+  created_at: order_by
+  expires_at: order_by
+  family_account: family_accounts_order_by
+  family_account_id: order_by
+  id: order_by
+  platform: order_by
+  status: order_by
+}
+
+"""primary key columns input for table: subscriptions"""
+input subscriptions_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "subscriptions"
+"""
+enum subscriptions_select_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  expires_at
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  id
+
+  """column name"""
+  platform
+
+  """column name"""
+  status
+}
+
+"""
+input type for updating data in table "subscriptions"
+"""
+input subscriptions_set_input {
+  created_at: timestamptz
+  expires_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  platform: String
+  status: String
+}
+
+"""
+Streaming cursor of the table "subscriptions"
+"""
+input subscriptions_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: subscriptions_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input subscriptions_stream_cursor_value_input {
+  created_at: timestamptz
+  expires_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  platform: String
+  status: String
+}
+
+"""
+update columns of table "subscriptions"
+"""
+enum subscriptions_update_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  expires_at
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  id
+
+  """column name"""
+  platform
+
+  """column name"""
+  status
+}
+
+input subscriptions_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: subscriptions_set_input
+
+  """filter the rows which have to be updated"""
+  where: subscriptions_bool_exp!
+}
+
+"""
+columns and relationships of "tale_children"
+"""
+type tale_children {
+  """An object relationship"""
+  child: children!
+  child_id: uuid!
+
+  """An object relationship"""
+  tale: tales!
+  tale_id: uuid!
+}
+
+"""
+aggregated selection of "tale_children"
+"""
+type tale_children_aggregate {
+  aggregate: tale_children_aggregate_fields
+  nodes: [tale_children!]!
+}
+
+input tale_children_aggregate_bool_exp {
+  count: tale_children_aggregate_bool_exp_count
+}
+
+input tale_children_aggregate_bool_exp_count {
+  arguments: [tale_children_select_column!]
+  distinct: Boolean
+  filter: tale_children_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "tale_children"
+"""
+type tale_children_aggregate_fields {
+  count(columns: [tale_children_select_column!], distinct: Boolean): Int!
+  max: tale_children_max_fields
+  min: tale_children_min_fields
+}
+
+"""
+order by aggregate values of table "tale_children"
+"""
+input tale_children_aggregate_order_by {
+  count: order_by
+  max: tale_children_max_order_by
+  min: tale_children_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "tale_children"
+"""
+input tale_children_arr_rel_insert_input {
+  data: [tale_children_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: tale_children_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "tale_children". All fields are combined with a logical 'AND'.
+"""
+input tale_children_bool_exp {
+  _and: [tale_children_bool_exp!]
+  _not: tale_children_bool_exp
+  _or: [tale_children_bool_exp!]
+  child: children_bool_exp
+  child_id: uuid_comparison_exp
+  tale: tales_bool_exp
+  tale_id: uuid_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "tale_children"
+"""
+enum tale_children_constraint {
+  """
+  unique or primary key constraint on columns "tale_id", "child_id"
+  """
+  tale_children_pkey
+}
+
+"""
+input type for inserting data into table "tale_children"
+"""
+input tale_children_insert_input {
+  child: children_obj_rel_insert_input
+  child_id: uuid
+  tale: tales_obj_rel_insert_input
+  tale_id: uuid
+}
+
+"""aggregate max on columns"""
+type tale_children_max_fields {
+  child_id: uuid
+  tale_id: uuid
+}
+
+"""
+order by max() on columns of table "tale_children"
+"""
+input tale_children_max_order_by {
+  child_id: order_by
+  tale_id: order_by
+}
+
+"""aggregate min on columns"""
+type tale_children_min_fields {
+  child_id: uuid
+  tale_id: uuid
+}
+
+"""
+order by min() on columns of table "tale_children"
+"""
+input tale_children_min_order_by {
+  child_id: order_by
+  tale_id: order_by
+}
+
+"""
+response of any mutation on the table "tale_children"
+"""
+type tale_children_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [tale_children!]!
+}
+
+"""
+on_conflict condition type for table "tale_children"
+"""
+input tale_children_on_conflict {
+  constraint: tale_children_constraint!
+  update_columns: [tale_children_update_column!]! = []
+  where: tale_children_bool_exp
+}
+
+"""Ordering options when selecting data from "tale_children"."""
+input tale_children_order_by {
+  child: children_order_by
+  child_id: order_by
+  tale: tales_order_by
+  tale_id: order_by
+}
+
+"""primary key columns input for table: tale_children"""
+input tale_children_pk_columns_input {
+  child_id: uuid!
+  tale_id: uuid!
+}
+
+"""
+select columns of table "tale_children"
+"""
+enum tale_children_select_column {
+  """column name"""
+  child_id
+
+  """column name"""
+  tale_id
+}
+
+"""
+input type for updating data in table "tale_children"
+"""
+input tale_children_set_input {
+  child_id: uuid
+  tale_id: uuid
+}
+
+"""
+Streaming cursor of the table "tale_children"
+"""
+input tale_children_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: tale_children_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input tale_children_stream_cursor_value_input {
+  child_id: uuid
+  tale_id: uuid
+}
+
+"""
+update columns of table "tale_children"
+"""
+enum tale_children_update_column {
+  """column name"""
+  child_id
+
+  """column name"""
+  tale_id
+}
+
+input tale_children_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: tale_children_set_input
+
+  """filter the rows which have to be updated"""
+  where: tale_children_bool_exp!
+}
+
+"""
+columns and relationships of "tale_media"
+"""
+type tale_media {
+  created_at: timestamptz!
+  display_order: Int!
+  id: uuid!
+  media_type: String!
+
+  """An object relationship"""
+  tale: tales!
+  tale_id: uuid!
+  url: String!
+}
+
+"""
+aggregated selection of "tale_media"
+"""
+type tale_media_aggregate {
+  aggregate: tale_media_aggregate_fields
+  nodes: [tale_media!]!
+}
+
+input tale_media_aggregate_bool_exp {
+  count: tale_media_aggregate_bool_exp_count
+}
+
+input tale_media_aggregate_bool_exp_count {
+  arguments: [tale_media_select_column!]
+  distinct: Boolean
+  filter: tale_media_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "tale_media"
+"""
+type tale_media_aggregate_fields {
+  avg: tale_media_avg_fields
+  count(columns: [tale_media_select_column!], distinct: Boolean): Int!
+  max: tale_media_max_fields
+  min: tale_media_min_fields
+  stddev: tale_media_stddev_fields
+  stddev_pop: tale_media_stddev_pop_fields
+  stddev_samp: tale_media_stddev_samp_fields
+  sum: tale_media_sum_fields
+  var_pop: tale_media_var_pop_fields
+  var_samp: tale_media_var_samp_fields
+  variance: tale_media_variance_fields
+}
+
+"""
+order by aggregate values of table "tale_media"
+"""
+input tale_media_aggregate_order_by {
+  avg: tale_media_avg_order_by
+  count: order_by
+  max: tale_media_max_order_by
+  min: tale_media_min_order_by
+  stddev: tale_media_stddev_order_by
+  stddev_pop: tale_media_stddev_pop_order_by
+  stddev_samp: tale_media_stddev_samp_order_by
+  sum: tale_media_sum_order_by
+  var_pop: tale_media_var_pop_order_by
+  var_samp: tale_media_var_samp_order_by
+  variance: tale_media_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "tale_media"
+"""
+input tale_media_arr_rel_insert_input {
+  data: [tale_media_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: tale_media_on_conflict
+}
+
+"""aggregate avg on columns"""
+type tale_media_avg_fields {
+  display_order: Float
+}
+
+"""
+order by avg() on columns of table "tale_media"
+"""
+input tale_media_avg_order_by {
+  display_order: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "tale_media". All fields are combined with a logical 'AND'.
+"""
+input tale_media_bool_exp {
+  _and: [tale_media_bool_exp!]
+  _not: tale_media_bool_exp
+  _or: [tale_media_bool_exp!]
+  created_at: timestamptz_comparison_exp
+  display_order: Int_comparison_exp
+  id: uuid_comparison_exp
+  media_type: String_comparison_exp
+  tale: tales_bool_exp
+  tale_id: uuid_comparison_exp
+  url: String_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "tale_media"
+"""
+enum tale_media_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  tale_media_pkey
+}
+
+"""
+input type for incrementing numeric columns in table "tale_media"
+"""
+input tale_media_inc_input {
+  display_order: Int
+}
+
+"""
+input type for inserting data into table "tale_media"
+"""
+input tale_media_insert_input {
+  created_at: timestamptz
+  display_order: Int
+  id: uuid
+  media_type: String
+  tale: tales_obj_rel_insert_input
+  tale_id: uuid
+  url: String
+}
+
+"""aggregate max on columns"""
+type tale_media_max_fields {
+  created_at: timestamptz
+  display_order: Int
+  id: uuid
+  media_type: String
+  tale_id: uuid
+  url: String
+}
+
+"""
+order by max() on columns of table "tale_media"
+"""
+input tale_media_max_order_by {
+  created_at: order_by
+  display_order: order_by
+  id: order_by
+  media_type: order_by
+  tale_id: order_by
+  url: order_by
+}
+
+"""aggregate min on columns"""
+type tale_media_min_fields {
+  created_at: timestamptz
+  display_order: Int
+  id: uuid
+  media_type: String
+  tale_id: uuid
+  url: String
+}
+
+"""
+order by min() on columns of table "tale_media"
+"""
+input tale_media_min_order_by {
+  created_at: order_by
+  display_order: order_by
+  id: order_by
+  media_type: order_by
+  tale_id: order_by
+  url: order_by
+}
+
+"""
+response of any mutation on the table "tale_media"
+"""
+type tale_media_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [tale_media!]!
+}
+
+"""
+on_conflict condition type for table "tale_media"
+"""
+input tale_media_on_conflict {
+  constraint: tale_media_constraint!
+  update_columns: [tale_media_update_column!]! = []
+  where: tale_media_bool_exp
+}
+
+"""Ordering options when selecting data from "tale_media"."""
+input tale_media_order_by {
+  created_at: order_by
+  display_order: order_by
+  id: order_by
+  media_type: order_by
+  tale: tales_order_by
+  tale_id: order_by
+  url: order_by
+}
+
+"""primary key columns input for table: tale_media"""
+input tale_media_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "tale_media"
+"""
+enum tale_media_select_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  display_order
+
+  """column name"""
+  id
+
+  """column name"""
+  media_type
+
+  """column name"""
+  tale_id
+
+  """column name"""
+  url
+}
+
+"""
+input type for updating data in table "tale_media"
+"""
+input tale_media_set_input {
+  created_at: timestamptz
+  display_order: Int
+  id: uuid
+  media_type: String
+  tale_id: uuid
+  url: String
+}
+
+"""aggregate stddev on columns"""
+type tale_media_stddev_fields {
+  display_order: Float
+}
+
+"""
+order by stddev() on columns of table "tale_media"
+"""
+input tale_media_stddev_order_by {
+  display_order: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type tale_media_stddev_pop_fields {
+  display_order: Float
+}
+
+"""
+order by stddev_pop() on columns of table "tale_media"
+"""
+input tale_media_stddev_pop_order_by {
+  display_order: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type tale_media_stddev_samp_fields {
+  display_order: Float
+}
+
+"""
+order by stddev_samp() on columns of table "tale_media"
+"""
+input tale_media_stddev_samp_order_by {
+  display_order: order_by
+}
+
+"""
+Streaming cursor of the table "tale_media"
+"""
+input tale_media_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: tale_media_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input tale_media_stream_cursor_value_input {
+  created_at: timestamptz
+  display_order: Int
+  id: uuid
+  media_type: String
+  tale_id: uuid
+  url: String
+}
+
+"""aggregate sum on columns"""
+type tale_media_sum_fields {
+  display_order: Int
+}
+
+"""
+order by sum() on columns of table "tale_media"
+"""
+input tale_media_sum_order_by {
+  display_order: order_by
+}
+
+"""
+update columns of table "tale_media"
+"""
+enum tale_media_update_column {
+  """column name"""
+  created_at
+
+  """column name"""
+  display_order
+
+  """column name"""
+  id
+
+  """column name"""
+  media_type
+
+  """column name"""
+  tale_id
+
+  """column name"""
+  url
+}
+
+input tale_media_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: tale_media_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: tale_media_set_input
+
+  """filter the rows which have to be updated"""
+  where: tale_media_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type tale_media_var_pop_fields {
+  display_order: Float
+}
+
+"""
+order by var_pop() on columns of table "tale_media"
+"""
+input tale_media_var_pop_order_by {
+  display_order: order_by
+}
+
+"""aggregate var_samp on columns"""
+type tale_media_var_samp_fields {
+  display_order: Float
+}
+
+"""
+order by var_samp() on columns of table "tale_media"
+"""
+input tale_media_var_samp_order_by {
+  display_order: order_by
+}
+
+"""aggregate variance on columns"""
+type tale_media_variance_fields {
+  display_order: Float
+}
+
+"""
+order by variance() on columns of table "tale_media"
+"""
+input tale_media_variance_order_by {
+  display_order: order_by
+}
+
+"""
+columns and relationships of "tale_tags"
+"""
+type tale_tags {
+  id: uuid!
+  tag: String!
+
+  """An object relationship"""
+  tale: tales!
+  tale_id: uuid!
+}
+
+"""
+aggregated selection of "tale_tags"
+"""
+type tale_tags_aggregate {
+  aggregate: tale_tags_aggregate_fields
+  nodes: [tale_tags!]!
+}
+
+input tale_tags_aggregate_bool_exp {
+  count: tale_tags_aggregate_bool_exp_count
+}
+
+input tale_tags_aggregate_bool_exp_count {
+  arguments: [tale_tags_select_column!]
+  distinct: Boolean
+  filter: tale_tags_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "tale_tags"
+"""
+type tale_tags_aggregate_fields {
+  count(columns: [tale_tags_select_column!], distinct: Boolean): Int!
+  max: tale_tags_max_fields
+  min: tale_tags_min_fields
+}
+
+"""
+order by aggregate values of table "tale_tags"
+"""
+input tale_tags_aggregate_order_by {
+  count: order_by
+  max: tale_tags_max_order_by
+  min: tale_tags_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "tale_tags"
+"""
+input tale_tags_arr_rel_insert_input {
+  data: [tale_tags_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: tale_tags_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "tale_tags". All fields are combined with a logical 'AND'.
+"""
+input tale_tags_bool_exp {
+  _and: [tale_tags_bool_exp!]
+  _not: tale_tags_bool_exp
+  _or: [tale_tags_bool_exp!]
+  id: uuid_comparison_exp
+  tag: String_comparison_exp
+  tale: tales_bool_exp
+  tale_id: uuid_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "tale_tags"
+"""
+enum tale_tags_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  tale_tags_pkey
+
+  """
+  unique or primary key constraint on columns "tale_id", "tag"
+  """
+  tale_tags_tale_id_tag_key
+}
+
+"""
+input type for inserting data into table "tale_tags"
+"""
+input tale_tags_insert_input {
+  id: uuid
+  tag: String
+  tale: tales_obj_rel_insert_input
+  tale_id: uuid
+}
+
+"""aggregate max on columns"""
+type tale_tags_max_fields {
+  id: uuid
+  tag: String
+  tale_id: uuid
+}
+
+"""
+order by max() on columns of table "tale_tags"
+"""
+input tale_tags_max_order_by {
+  id: order_by
+  tag: order_by
+  tale_id: order_by
+}
+
+"""aggregate min on columns"""
+type tale_tags_min_fields {
+  id: uuid
+  tag: String
+  tale_id: uuid
+}
+
+"""
+order by min() on columns of table "tale_tags"
+"""
+input tale_tags_min_order_by {
+  id: order_by
+  tag: order_by
+  tale_id: order_by
+}
+
+"""
+response of any mutation on the table "tale_tags"
+"""
+type tale_tags_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [tale_tags!]!
+}
+
+"""
+on_conflict condition type for table "tale_tags"
+"""
+input tale_tags_on_conflict {
+  constraint: tale_tags_constraint!
+  update_columns: [tale_tags_update_column!]! = []
+  where: tale_tags_bool_exp
+}
+
+"""Ordering options when selecting data from "tale_tags"."""
+input tale_tags_order_by {
+  id: order_by
+  tag: order_by
+  tale: tales_order_by
+  tale_id: order_by
+}
+
+"""primary key columns input for table: tale_tags"""
+input tale_tags_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "tale_tags"
+"""
+enum tale_tags_select_column {
+  """column name"""
+  id
+
+  """column name"""
+  tag
+
+  """column name"""
+  tale_id
+}
+
+"""
+input type for updating data in table "tale_tags"
+"""
+input tale_tags_set_input {
+  id: uuid
+  tag: String
+  tale_id: uuid
+}
+
+"""
+Streaming cursor of the table "tale_tags"
+"""
+input tale_tags_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: tale_tags_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input tale_tags_stream_cursor_value_input {
+  id: uuid
+  tag: String
+  tale_id: uuid
+}
+
+"""
+update columns of table "tale_tags"
+"""
+enum tale_tags_update_column {
+  """column name"""
+  id
+
+  """column name"""
+  tag
+
+  """column name"""
+  tale_id
+}
+
+input tale_tags_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: tale_tags_set_input
+
+  """filter the rows which have to be updated"""
+  where: tale_tags_bool_exp!
+}
+
+"""
+columns and relationships of "tales"
+"""
+type tales {
+  author_id: uuid!
+
+  """An array relationship"""
+  comments(
+    """distinct select on columns"""
+    distinct_on: [comments_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [comments_order_by!]
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): [comments!]!
+
+  """An aggregate relationship"""
+  comments_aggregate(
+    """distinct select on columns"""
+    distinct_on: [comments_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [comments_order_by!]
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): comments_aggregate!
+  created_at: timestamptz!
+
+  """An object relationship"""
+  family_account: family_accounts!
+  family_account_id: uuid!
+  id: uuid!
+  narrative: String!
+  raw_transcript: String
+
+  """An array relationship"""
+  reactions(
+    """distinct select on columns"""
+    distinct_on: [reactions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reactions_order_by!]
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): [reactions!]!
+
+  """An aggregate relationship"""
+  reactions_aggregate(
+    """distinct select on columns"""
+    distinct_on: [reactions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reactions_order_by!]
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): reactions_aggregate!
+
+  """An array relationship"""
+  tale_children(
+    """distinct select on columns"""
+    distinct_on: [tale_children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_children_order_by!]
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): [tale_children!]!
+
+  """An aggregate relationship"""
+  tale_children_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_children_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_children_order_by!]
+
+    """filter the rows returned"""
+    where: tale_children_bool_exp
+  ): tale_children_aggregate!
+
+  """An array relationship"""
+  tale_media(
+    """distinct select on columns"""
+    distinct_on: [tale_media_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_media_order_by!]
+
+    """filter the rows returned"""
+    where: tale_media_bool_exp
+  ): [tale_media!]!
+
+  """An aggregate relationship"""
+  tale_media_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_media_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_media_order_by!]
+
+    """filter the rows returned"""
+    where: tale_media_bool_exp
+  ): tale_media_aggregate!
+
+  """An array relationship"""
+  tale_tags(
+    """distinct select on columns"""
+    distinct_on: [tale_tags_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_tags_order_by!]
+
+    """filter the rows returned"""
+    where: tale_tags_bool_exp
+  ): [tale_tags!]!
+
+  """An aggregate relationship"""
+  tale_tags_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tale_tags_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tale_tags_order_by!]
+
+    """filter the rows returned"""
+    where: tale_tags_bool_exp
+  ): tale_tags_aggregate!
+  title: String
+  updated_at: timestamptz!
+
+  """An object relationship"""
+  user: users!
+}
+
+"""
+aggregated selection of "tales"
+"""
+type tales_aggregate {
+  aggregate: tales_aggregate_fields
+  nodes: [tales!]!
+}
+
+input tales_aggregate_bool_exp {
+  count: tales_aggregate_bool_exp_count
+}
+
+input tales_aggregate_bool_exp_count {
+  arguments: [tales_select_column!]
+  distinct: Boolean
+  filter: tales_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "tales"
+"""
+type tales_aggregate_fields {
+  count(columns: [tales_select_column!], distinct: Boolean): Int!
+  max: tales_max_fields
+  min: tales_min_fields
+}
+
+"""
+order by aggregate values of table "tales"
+"""
+input tales_aggregate_order_by {
+  count: order_by
+  max: tales_max_order_by
+  min: tales_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "tales"
+"""
+input tales_arr_rel_insert_input {
+  data: [tales_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: tales_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "tales". All fields are combined with a logical 'AND'.
+"""
+input tales_bool_exp {
+  _and: [tales_bool_exp!]
+  _not: tales_bool_exp
+  _or: [tales_bool_exp!]
+  author_id: uuid_comparison_exp
+  comments: comments_bool_exp
+  comments_aggregate: comments_aggregate_bool_exp
+  created_at: timestamptz_comparison_exp
+  family_account: family_accounts_bool_exp
+  family_account_id: uuid_comparison_exp
+  id: uuid_comparison_exp
+  narrative: String_comparison_exp
+  raw_transcript: String_comparison_exp
+  reactions: reactions_bool_exp
+  reactions_aggregate: reactions_aggregate_bool_exp
+  tale_children: tale_children_bool_exp
+  tale_children_aggregate: tale_children_aggregate_bool_exp
+  tale_media: tale_media_bool_exp
+  tale_media_aggregate: tale_media_aggregate_bool_exp
+  tale_tags: tale_tags_bool_exp
+  tale_tags_aggregate: tale_tags_aggregate_bool_exp
+  title: String_comparison_exp
+  updated_at: timestamptz_comparison_exp
+  user: users_bool_exp
+}
+
+"""
+unique or primary key constraints on table "tales"
+"""
+enum tales_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  tales_pkey
+}
+
+"""
+input type for inserting data into table "tales"
+"""
+input tales_insert_input {
+  author_id: uuid
+  comments: comments_arr_rel_insert_input
+  created_at: timestamptz
+  family_account: family_accounts_obj_rel_insert_input
+  family_account_id: uuid
+  id: uuid
+  narrative: String
+  raw_transcript: String
+  reactions: reactions_arr_rel_insert_input
+  tale_children: tale_children_arr_rel_insert_input
+  tale_media: tale_media_arr_rel_insert_input
+  tale_tags: tale_tags_arr_rel_insert_input
+  title: String
+  updated_at: timestamptz
+  user: users_obj_rel_insert_input
+}
+
+"""aggregate max on columns"""
+type tales_max_fields {
+  author_id: uuid
+  created_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  narrative: String
+  raw_transcript: String
+  title: String
+  updated_at: timestamptz
+}
+
+"""
+order by max() on columns of table "tales"
+"""
+input tales_max_order_by {
+  author_id: order_by
+  created_at: order_by
+  family_account_id: order_by
+  id: order_by
+  narrative: order_by
+  raw_transcript: order_by
+  title: order_by
+  updated_at: order_by
+}
+
+"""aggregate min on columns"""
+type tales_min_fields {
+  author_id: uuid
+  created_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  narrative: String
+  raw_transcript: String
+  title: String
+  updated_at: timestamptz
+}
+
+"""
+order by min() on columns of table "tales"
+"""
+input tales_min_order_by {
+  author_id: order_by
+  created_at: order_by
+  family_account_id: order_by
+  id: order_by
+  narrative: order_by
+  raw_transcript: order_by
+  title: order_by
+  updated_at: order_by
+}
+
+"""
+response of any mutation on the table "tales"
+"""
+type tales_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [tales!]!
+}
+
+"""
+input type for inserting object relation for remote table "tales"
+"""
+input tales_obj_rel_insert_input {
+  data: tales_insert_input!
+
+  """upsert condition"""
+  on_conflict: tales_on_conflict
+}
+
+"""
+on_conflict condition type for table "tales"
+"""
+input tales_on_conflict {
+  constraint: tales_constraint!
+  update_columns: [tales_update_column!]! = []
+  where: tales_bool_exp
+}
+
+"""Ordering options when selecting data from "tales"."""
+input tales_order_by {
+  author_id: order_by
+  comments_aggregate: comments_aggregate_order_by
+  created_at: order_by
+  family_account: family_accounts_order_by
+  family_account_id: order_by
+  id: order_by
+  narrative: order_by
+  raw_transcript: order_by
+  reactions_aggregate: reactions_aggregate_order_by
+  tale_children_aggregate: tale_children_aggregate_order_by
+  tale_media_aggregate: tale_media_aggregate_order_by
+  tale_tags_aggregate: tale_tags_aggregate_order_by
+  title: order_by
+  updated_at: order_by
+  user: users_order_by
+}
+
+"""primary key columns input for table: tales"""
+input tales_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "tales"
+"""
+enum tales_select_column {
+  """column name"""
+  author_id
+
+  """column name"""
+  created_at
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  id
+
+  """column name"""
+  narrative
+
+  """column name"""
+  raw_transcript
+
+  """column name"""
+  title
+
+  """column name"""
+  updated_at
+}
+
+"""
+input type for updating data in table "tales"
+"""
+input tales_set_input {
+  author_id: uuid
+  created_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  narrative: String
+  raw_transcript: String
+  title: String
+  updated_at: timestamptz
+}
+
+"""
+Streaming cursor of the table "tales"
+"""
+input tales_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: tales_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input tales_stream_cursor_value_input {
+  author_id: uuid
+  created_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  narrative: String
+  raw_transcript: String
+  title: String
+  updated_at: timestamptz
+}
+
+"""
+update columns of table "tales"
+"""
+enum tales_update_column {
+  """column name"""
+  author_id
+
+  """column name"""
+  created_at
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  id
+
+  """column name"""
+  narrative
+
+  """column name"""
+  raw_transcript
+
+  """column name"""
+  title
+
+  """column name"""
+  updated_at
+}
+
+input tales_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: tales_set_input
+
+  """filter the rows which have to be updated"""
+  where: tales_bool_exp!
+}
+
+scalar timestamptz
+
+"""
+Boolean expression to compare columns of type "timestamptz". All fields are combined with logical 'AND'.
+"""
+input timestamptz_comparison_exp {
+  _eq: timestamptz
+  _gt: timestamptz
+  _gte: timestamptz
+  _in: [timestamptz!]
+  _is_null: Boolean
+  _lt: timestamptz
+  _lte: timestamptz
+  _neq: timestamptz
+  _nin: [timestamptz!]
+}
+
+"""
+columns and relationships of "users"
+"""
+type users {
+  avatar_url: String
+
+  """An array relationship"""
+  comments(
+    """distinct select on columns"""
+    distinct_on: [comments_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [comments_order_by!]
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): [comments!]!
+
+  """An aggregate relationship"""
+  comments_aggregate(
+    """distinct select on columns"""
+    distinct_on: [comments_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [comments_order_by!]
+
+    """filter the rows returned"""
+    where: comments_bool_exp
+  ): comments_aggregate!
+  created_at: timestamptz!
+
+  """An object relationship"""
+  family_account: family_accounts
+  family_account_id: uuid
+
+  """An array relationship"""
+  guest_invites(
+    """distinct select on columns"""
+    distinct_on: [guest_invites_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [guest_invites_order_by!]
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): [guest_invites!]!
+
+  """An aggregate relationship"""
+  guest_invites_aggregate(
+    """distinct select on columns"""
+    distinct_on: [guest_invites_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [guest_invites_order_by!]
+
+    """filter the rows returned"""
+    where: guest_invites_bool_exp
+  ): guest_invites_aggregate!
+  id: uuid!
+  name: String!
+
+  """An array relationship"""
+  reactions(
+    """distinct select on columns"""
+    distinct_on: [reactions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reactions_order_by!]
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): [reactions!]!
+
+  """An aggregate relationship"""
+  reactions_aggregate(
+    """distinct select on columns"""
+    distinct_on: [reactions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reactions_order_by!]
+
+    """filter the rows returned"""
+    where: reactions_bool_exp
+  ): reactions_aggregate!
+  role: String!
+
+  """An array relationship"""
+  tales(
+    """distinct select on columns"""
+    distinct_on: [tales_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tales_order_by!]
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): [tales!]!
+
+  """An aggregate relationship"""
+  tales_aggregate(
+    """distinct select on columns"""
+    distinct_on: [tales_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [tales_order_by!]
+
+    """filter the rows returned"""
+    where: tales_bool_exp
+  ): tales_aggregate!
+}
+
+"""
+aggregated selection of "users"
+"""
+type users_aggregate {
+  aggregate: users_aggregate_fields
+  nodes: [users!]!
+}
+
+input users_aggregate_bool_exp {
+  count: users_aggregate_bool_exp_count
+}
+
+input users_aggregate_bool_exp_count {
+  arguments: [users_select_column!]
+  distinct: Boolean
+  filter: users_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "users"
+"""
+type users_aggregate_fields {
+  count(columns: [users_select_column!], distinct: Boolean): Int!
+  max: users_max_fields
+  min: users_min_fields
+}
+
+"""
+order by aggregate values of table "users"
+"""
+input users_aggregate_order_by {
+  count: order_by
+  max: users_max_order_by
+  min: users_min_order_by
+}
+
+"""
+input type for inserting array relation for remote table "users"
+"""
+input users_arr_rel_insert_input {
+  data: [users_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: users_on_conflict
+}
+
+"""
+Boolean expression to filter rows from the table "users". All fields are combined with a logical 'AND'.
+"""
+input users_bool_exp {
+  _and: [users_bool_exp!]
+  _not: users_bool_exp
+  _or: [users_bool_exp!]
+  avatar_url: String_comparison_exp
+  comments: comments_bool_exp
+  comments_aggregate: comments_aggregate_bool_exp
+  created_at: timestamptz_comparison_exp
+  family_account: family_accounts_bool_exp
+  family_account_id: uuid_comparison_exp
+  guest_invites: guest_invites_bool_exp
+  guest_invites_aggregate: guest_invites_aggregate_bool_exp
+  id: uuid_comparison_exp
+  name: String_comparison_exp
+  reactions: reactions_bool_exp
+  reactions_aggregate: reactions_aggregate_bool_exp
+  role: String_comparison_exp
+  tales: tales_bool_exp
+  tales_aggregate: tales_aggregate_bool_exp
+}
+
+"""
+unique or primary key constraints on table "users"
+"""
+enum users_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  users_pkey
+}
+
+"""
+input type for inserting data into table "users"
+"""
+input users_insert_input {
+  avatar_url: String
+  comments: comments_arr_rel_insert_input
+  created_at: timestamptz
+  family_account: family_accounts_obj_rel_insert_input
+  family_account_id: uuid
+  guest_invites: guest_invites_arr_rel_insert_input
+  id: uuid
+  name: String
+  reactions: reactions_arr_rel_insert_input
+  role: String
+  tales: tales_arr_rel_insert_input
+}
+
+"""aggregate max on columns"""
+type users_max_fields {
+  avatar_url: String
+  created_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  name: String
+  role: String
+}
+
+"""
+order by max() on columns of table "users"
+"""
+input users_max_order_by {
+  avatar_url: order_by
+  created_at: order_by
+  family_account_id: order_by
+  id: order_by
+  name: order_by
+  role: order_by
+}
+
+"""aggregate min on columns"""
+type users_min_fields {
+  avatar_url: String
+  created_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  name: String
+  role: String
+}
+
+"""
+order by min() on columns of table "users"
+"""
+input users_min_order_by {
+  avatar_url: order_by
+  created_at: order_by
+  family_account_id: order_by
+  id: order_by
+  name: order_by
+  role: order_by
+}
+
+"""
+response of any mutation on the table "users"
+"""
+type users_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [users!]!
+}
+
+"""
+input type for inserting object relation for remote table "users"
+"""
+input users_obj_rel_insert_input {
+  data: users_insert_input!
+
+  """upsert condition"""
+  on_conflict: users_on_conflict
+}
+
+"""
+on_conflict condition type for table "users"
+"""
+input users_on_conflict {
+  constraint: users_constraint!
+  update_columns: [users_update_column!]! = []
+  where: users_bool_exp
+}
+
+"""Ordering options when selecting data from "users"."""
+input users_order_by {
+  avatar_url: order_by
+  comments_aggregate: comments_aggregate_order_by
+  created_at: order_by
+  family_account: family_accounts_order_by
+  family_account_id: order_by
+  guest_invites_aggregate: guest_invites_aggregate_order_by
+  id: order_by
+  name: order_by
+  reactions_aggregate: reactions_aggregate_order_by
+  role: order_by
+  tales_aggregate: tales_aggregate_order_by
+}
+
+"""primary key columns input for table: users"""
+input users_pk_columns_input {
+  id: uuid!
+}
+
+"""
+select columns of table "users"
+"""
+enum users_select_column {
+  """column name"""
+  avatar_url
+
+  """column name"""
+  created_at
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  id
+
+  """column name"""
+  name
+
+  """column name"""
+  role
+}
+
+"""
+input type for updating data in table "users"
+"""
+input users_set_input {
+  avatar_url: String
+  created_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  name: String
+  role: String
+}
+
+"""
+Streaming cursor of the table "users"
+"""
+input users_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: users_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input users_stream_cursor_value_input {
+  avatar_url: String
+  created_at: timestamptz
+  family_account_id: uuid
+  id: uuid
+  name: String
+  role: String
+}
+
+"""
+update columns of table "users"
+"""
+enum users_update_column {
+  """column name"""
+  avatar_url
+
+  """column name"""
+  created_at
+
+  """column name"""
+  family_account_id
+
+  """column name"""
+  id
+
+  """column name"""
+  name
+
+  """column name"""
+  role
+}
+
+input users_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: users_set_input
+
+  """filter the rows which have to be updated"""
+  where: users_bool_exp!
+}
+
+scalar uuid
+
+"""
+Boolean expression to compare columns of type "uuid". All fields are combined with logical 'AND'.
+"""
+input uuid_comparison_exp {
+  _eq: uuid
+  _gt: uuid
+  _gte: uuid
+  _in: [uuid!]
+  _is_null: Boolean
+  _lt: uuid
+  _lte: uuid
+  _neq: uuid
+  _nin: [uuid!]
+}

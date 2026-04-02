@@ -2,7 +2,14 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
-    "jsx": "react-native"
+    "jsx": "react-native",
+    "plugins": [
+      {
+        "name": "gql.tada/ts-plugin",
+        "schema": "./graphql/schema.graphql",
+        "tadaOutputLocation": "./graphql/graphql-env.d.ts"
+      }
+    ]
   },
   "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"]
 }

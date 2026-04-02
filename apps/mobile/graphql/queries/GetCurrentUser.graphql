@@ -1,0 +1,11 @@
+query GetCurrentUser($id: uuid!) {
+  users_by_pk(id: $id) {
+    id
+    name
+    role
+    family_account_id
+    avatar_url
+    created_at
+  }
+}
+
