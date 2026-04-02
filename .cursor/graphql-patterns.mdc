@@ -1,0 +1,243 @@
+---
+description: GraphQL query, mutation, and subscription patterns for this project
+globs: "**/*.graphql,**/*.ts"
+alwaysApply: false
+---
+
+# Tiny Tales — GraphQL Patterns
+
+Reference for all GraphQL work in this project. Applies to query files, hooks, and mutations.
+
+---
+
+## Stack
+
+- **Hasura Cloud** — auto-generated GraphQL API on top of Supabase Postgres
+- **Apollo Client** — GraphQL client in the mobile app
+- **graphql-tada** — end-to-end type safety from schema to component
+
+---
+
+## File Locations
+
+```
+apps/mobile/graphql/
+├── queries/          # Read operations
+├── mutations/        # Write operations
+└── subscriptions/    # Real-time operations
+```
+
+All `.graphql` files use PascalCase named operations that exactly match the filename:
+- `GetTalesFeed.graphql` contains `query GetTalesFeed { ... }`
+- `InsertTale.graphql` contains `mutation InsertTale { ... }`
+- `OnTaleComments.graphql` contains `subscription OnTaleComments { ... }`
+
+---
+
+## graphql-tada Usage
+
+Always use the `graphql` tag from `lib/tada.ts` — never import from `graphql-tag` directly.
+
+```typescript
+import { graphql } from '../lib/tada'
+import { useQuery } from '@apollo/client'
+
+const GET_TALES_FEED = graphql(`
+  query GetTalesFeed($familyAccountId: uuid!) {
+    tales(
+      where: { family_account_id: { _eq: $familyAccountId } }
+      order_by: { created_at: desc }
+    ) {
+      id
+      title
+      narrative
+      created_at
+      author { id name avatar_url }
+      tale_children { child { id name photo_url } }
+      tale_tags { tag }
+    }
+  }
+`)
+
+// ResultOf gives you the typed result
+import { ResultOf } from 'gql.tada'
+type TalesFeedResult = ResultOf<typeof GET_TALES_FEED>
+```
+
+---
+
+## Hooks Pattern
+
+Every query should have a custom hook in `hooks/`. Components never call `useQuery` directly.
+
+```typescript
+// hooks/useTalesFeed.ts
+
+import { useQuery } from '@apollo/client'
+import { graphql } from '../lib/tada'
+import { useStore } from '../lib/store'
+
+const GET_TALES_FEED = graphql(`...`)
+
+export function useTalesFeed(childFilter?: string, tagFilter?: string[]) {
+  const { currentUser } = useStore()
+
+  const { data, loading, error, refetch } = useQuery(GET_TALES_FEED, {
+    variables: {
+      familyAccountId: currentUser.familyAccountId,
+      // add filter variables here
+    },
+    skip: !currentUser.familyAccountId,
+  })
+
+  return {
+    tales: data?.tales ?? [],
+    loading,
+    error,
+    refetch,
+  }
+}
+```
+
+Hook naming: `use` + operation name without `Get` prefix → `useTalesFeed`, `useTaleDetail`, `useCurrentUser`.
+
+---
+
+## Mutations Pattern
+
+Mutations are called directly in components/handlers — no wrapper hook needed unless the mutation is reused in 2+ places.
+
+```typescript
+import { useMutation } from '@apollo/client'
+import { graphql } from '../lib/tada'
+import { showSuccess, showError } from '../lib/toast'
+
+const INSERT_TALE = graphql(`
+  mutation InsertTale($object: tales_insert_input!) {
+    insert_tales_one(object: $object) {
+      id
+      created_at
+    }
+  }
+`)
+
+// In component:
+const [insertTale, { loading }] = useMutation(INSERT_TALE, {
+  onCompleted: () => {
+    showSuccess('Your tale has been saved ✨')
+    router.replace('/(app)/')
+  },
+  onError: (error) => {
+    console.error('[InsertTale]', error)
+    showError('Something went wrong — please try again')
+  },
+  // Refetch the feed so the new tale appears immediately
+  refetchQueries: ['GetTalesFeed'],
+})
+```
+
+---
+
+## Nested Inserts
+
+Use Hasura's nested insert syntax to insert a tale and all related records in a single mutation. Never chain multiple mutations sequentially.
+
+```graphql
+mutation InsertTale($object: tales_insert_input!) {
+  insert_tales_one(object: $object) {
+    id
+    tale_children { child { id name } }
+    tale_tags { tag }
+    tale_media { url }
+  }
+}
+```
+
+Variables:
+```typescript
+{
+  object: {
+    narrative: "...",
+    title: "...",
+    family_account_id: currentUser.familyAccountId,
+    author_id: currentUser.id,
+    tale_children: {
+      data: selectedChildIds.map(id => ({ child_id: id }))
+    },
+    tale_tags: {
+      data: tags.map(tag => ({ tag }))
+    },
+    tale_media: {
+      data: mediaUrls.map((url, i) => ({ url, media_type: 'photo', display_order: i }))
+    }
+  }
+}
+```
+
+---
+
+## Subscriptions
+
+Use `useSubscription` from Apollo for real-time data. Subscriptions connect via WebSocket to `EXPO_PUBLIC_HASURA_WS_ENDPOINT`.
+
+```typescript
+import { useSubscription } from '@apollo/client'
+import { graphql } from '../lib/tada'
+
+const ON_TALE_COMMENTS = graphql(`
+  subscription OnTaleComments($taleId: uuid!) {
+    comments(
+      where: { tale_id: { _eq: $taleId } }
+      order_by: { created_at: asc }
+    ) {
+      id
+      content
+      created_at
+      user { id name avatar_url }
+    }
+  }
+`)
+
+const { data } = useSubscription(ON_TALE_COMMENTS, {
+  variables: { taleId },
+})
+```
+
+Only use subscriptions for genuinely real-time data (comments, reactions). Use queries + `refetchQueries` for everything else.
+
+---
+
+## Hasura Variable Conventions
+
+| Hasura type | TypeScript type | Usage |
+|---|---|---|
+| `uuid!` | `string` | All IDs |
+| `timestamptz` | `string` (ISO 8601) | Dates — use `new Date().toISOString()` |
+| `_eq`, `_lt`, `_gt` | Comparison operators | Filter variables |
+| `order_by` | `{ field: 'asc' \| 'desc' }` | Sorting |
+
+---
+
+## Apollo Cache
+
+- After a mutation that adds a new item to a list, use `refetchQueries: ['GetTalesFeed']` rather than manual cache updates — simpler and less error-prone for v1
+- After a delete mutation, use `refetchQueries` for the relevant list query
+- Do not use `cache.modify()` unless there is a measurable performance reason
+
+---
+
+## Hasura Actions
+
+Hasura Actions (e.g. `processAudioTale`, `acceptGuestInvite`) are called like regular mutations but trigger a Cloudflare Worker instead of a direct DB write.
+
+```graphql
+mutation ProcessAudioTale($audioUrl: String!, $childIds: [uuid!]!, $childNames: [String!]!) {
+  processAudioTale(audio_url: $audioUrl, child_ids: $childIds, child_names: $childNames) {
+    narrative
+    title
+    tags
+  }
+}
+```
+
+Actions are defined in `hasura/metadata/actions.yaml` — do not modify the mobile-side query pattern for actions vs regular mutations.
