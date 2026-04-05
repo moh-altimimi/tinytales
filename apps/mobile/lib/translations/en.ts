@@ -1,0 +1,40 @@
+export default {
+  common: {
+    appName: 'Tiny Tales',
+    loading: 'Loading…',
+    retry: 'Try again',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    error: 'Something went wrong — please try again',
+    success: 'Done!',
+  },
+  auth: {
+    signInSubtitle: 'Sign in to continue',
+    createAccountSubtitle: 'Create your account',
+    continueWithGoogle: 'Continue with Google',
+    continueWithApple: 'Continue with Apple',
+    openRegistration: 'Open registration',
+    needDifferentEntry: 'Need a different entry point?',
+    alreadySignedUp: 'Already signed up?',
+    logIn: 'Log in',
+    signInCancelled: '{{provider}} sign-in was cancelled.',
+    unableToSignIn: 'Unable to sign in with {{provider}}.',
+  },
+  feed: {
+    noTalesTitle: 'No tales yet',
+    noTalesBody: 'Record your first moment — it only takes a minute.',
+    tellATale: 'Tell a tale',
+  },
+  tale: {
+    saved: 'Your tale has been saved',
+    deleted: 'Tale deleted',
+    editTitle: 'Edit tale',
+  },
+  account: {
+    title: 'Account',
+    signOut: 'Sign out',
+    deleteAccount: 'Delete account',
+    deleteConfirm: 'Are you sure? This cannot be undone.',
+  },
+} as const;

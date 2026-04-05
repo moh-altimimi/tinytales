@@ -1,2 +1,2 @@
-export { graphql } from 'gql.tada'
+export {graphql} from 'gql.tada';
 
